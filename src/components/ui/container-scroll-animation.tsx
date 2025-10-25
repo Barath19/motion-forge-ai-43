@@ -50,7 +50,7 @@ export const ContainerScroll = ({
     [0, 0.5, 1],
     isMobile ? [0.9, 1.1, 1.35] : [1.05, 1.25, 1.55]
   );
-  const headlineTranslate = useTransform(scrollYProgress, [0, 1], [0, -180]);
+  const headlineTranslate = useTransform(scrollYProgress, [0, 1], [-90, -240]);
   const baseCardHeightRem = isMobile ? 30 : 40;
   const cardHeightPx = baseCardHeightRem * 16;
   const centerTranslate = React.useMemo(
@@ -65,11 +65,11 @@ export const ContainerScroll = ({
 
   return (
     <div
-      className="min-h-[80rem] md:min-h-[110rem] flex items-center justify-center relative p-2 md:p-20"
+      className="min-h-[70rem] md:min-h-[100rem] flex items-center justify-center relative p-2 md:p-16"
       ref={containerRef}
     >
       <div
-        className="py-10 md:py-40 w-full relative"
+        className="py-4 md:py-16 w-full relative"
         style={{
           perspective: "1000px",
         }}

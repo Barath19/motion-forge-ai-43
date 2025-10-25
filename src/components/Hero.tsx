@@ -4,7 +4,7 @@ import Button from '@/components/Button';
 
 const Hero = () => {
   return (
-    <section className="relative flex flex-col overflow-hidden min-h-[180vh] pb-[520px] pt-[120px] md:min-h-[220vh] md:pb-[820px] md:pt-[180px]">
+    <section className="relative flex flex-col overflow-hidden min-h-[170vh] pb-[420px] pt-[48px] md:min-h-[210vh] md:pb-[680px] md:pt-[110px]">
       <GradientBackdrop variant="hero" />
 
       <ContainerScroll
