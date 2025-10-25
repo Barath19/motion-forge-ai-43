@@ -32,7 +32,7 @@ const HeroScreenMarquee = () => {
 
   const renderText = () => (
     <>
-      Create <span className="px-2 text-white" style={{ backgroundColor: 'hsl(270 80% 50%)' }}>campaigns</span> that actually <span className="px-2 text-white" style={{ backgroundColor: 'hsl(270 80% 50%)' }}>convert</span>
+      Create <span className="px-2 text-black" style={{ backgroundColor: 'hsl(45 100% 50%)' }}>campaigns</span> that actually <span className="px-2 text-black" style={{ backgroundColor: 'hsl(45 100% 50%)' }}>convert</span>
     </>
   );
 
