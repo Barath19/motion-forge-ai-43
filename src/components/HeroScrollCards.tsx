@@ -141,36 +141,23 @@ const HeroScrollCards = () => {
       <div className="pointer-events-none absolute inset-[12px] rounded-[36px] border border-white/5 opacity-30" />
       <div className="pointer-events-none absolute inset-[16px] rounded-[32px] bg-gradient-to-br from-white/[0.08] via-transparent to-transparent opacity-60" />
 
-      <div ref={listRef} className="relative flex w-max gap-10 px-4">
+      <div ref={listRef} className="relative flex w-max gap-6 px-4">
         {renderCards.map((card, index) => (
           <div
             key={`${card.id}-${index}`}
-            className={`flex h-[360px] md:h-[420px] w-auto flex-col overflow-hidden rounded-[32px] border border-white/15 p-7 text-left text-white shadow-[0_18px_45px_rgba(6,7,12,0.45)] ${card.className}`}
+            className="h-[360px] md:h-[420px] w-auto overflow-hidden rounded-2xl"
             style={{ aspectRatio: '9 / 16' }}
           >
-            <div className="flex flex-1 items-center justify-center relative overflow-hidden rounded-2xl">
-              {card.type === 'video' && card.videoSrc ? (
-                <video
-                  src={card.videoSrc}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  className="absolute inset-0 h-full w-full object-cover"
-                />
-              ) : (
-                <button
-                  type="button"
-                  className="group inline-flex h-16 w-16 items-center justify-center rounded-full border border-white/40 bg-white/10 backdrop-blur transition-all duration-300 hover:border-white/60 hover:bg-white/20"
-                  aria-label="Play preview"
-                >
-                  <Play className="h-6 w-6 text-white transition-transform duration-300 group-hover:scale-110" />
-                </button>
-              )}
-            </div>
-            <div className="pt-6 text-xs font-medium uppercase tracking-[0.3em] text-white/60">
-              FrameLab
-            </div>
+            {card.type === 'video' && card.videoSrc && (
+              <video
+                src={card.videoSrc}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="h-full w-full object-cover"
+              />
+            )}
           </div>
         ))}
       </div>
