@@ -5,6 +5,7 @@ import Features from '@/components/Features';
 import GradientBackdrop from '@/components/GradientBackdrop';
 import Hero from '@/components/Hero';
 import Workflow from '@/components/Workflow';
+import Button from '@/components/Button';
 import { UploadCloud, Eraser, PanelsTopLeft, Clapperboard, ChevronLeft, ChevronRight } from 'lucide-react';
 const steps = [{
   id: '01',
@@ -59,7 +60,9 @@ const Index = () => {
         <section className="relative min-h-screen overflow-hidden bg-black text-white">
           <GradientBackdrop variant="section" />
           <div className="relative z-10 mx-auto flex min-h-screen max-w-5xl flex-col items-center justify-center gap-8 px-6 text-center md:gap-12">
-            
+            <Button variant="primary" size="lg">
+              Get Started
+            </Button>
           </div>
         </section>
         

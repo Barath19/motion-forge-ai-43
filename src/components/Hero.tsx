@@ -4,7 +4,6 @@ import HeroScreenMarquee from '@/components/HeroScreenMarquee';
 import HeroScrollCards from '@/components/HeroScrollCards';
 import { StaggeredFade } from '@/components/StaggeredFade';
 import { ContainerScroll } from '@/components/ui/container-scroll-animation';
-import Button from '@/components/Button';
 
 const Hero = () => {
   return (
@@ -30,11 +29,6 @@ const Hero = () => {
                   FrameLab
                 </BlurIn>
               </h1>
-              <div className="mt-8">
-                <Button variant="primary" size="lg">
-                  Get Started
-                </Button>
-              </div>
             </>
           }
         >
