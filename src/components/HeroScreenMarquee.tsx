@@ -4,7 +4,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useEffect, useRef } from 'react';
 
-const marqueeCopy = 'This is a horizontally scrolling text carousel!';
+const marqueeCopy = 'Create campaigns that actually convert';
 
 const HeroScreenMarquee = () => {
   const textRef = useRef<HTMLDivElement | null>(null);
