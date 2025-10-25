@@ -1,10 +1,10 @@
 import { motion } from 'framer-motion';
 import { useState, useRef } from 'react';
-import { Upload, X, Video, Loader2, Check, Info, Lightbulb } from 'lucide-react';
-import GradientBackdrop from '@/components/GradientBackdrop';
+import { Upload, X, Download, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { resizeImageTo1280x720 } from '@/utils/imageProcessing';
 import { 
   createVideoJob, 
@@ -25,19 +25,13 @@ interface GeneratedVideo {
   jobId: string;
 }
 
-const quickSuggestions = [
-  'Smooth rotation',
-  'Dynamic zoom',
-  'Studio lighting',
-  'Premium feel',
-  'Cinematic angles',
-  'Slow motion',
-];
+const durations = ['4s', '8s', '12s'];
 
 const GetStarted = () => {
   const [uploadedImage, setUploadedImage] = useState<UploadedImage | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [prompt, setPrompt] = useState('');
+  const [duration, setDuration] = useState('8s');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationStatus, setGenerationStatus] = useState<string>('');
   const [generatedVideo, setGeneratedVideo] = useState<GeneratedVideo | null>(null);
@@ -120,14 +114,6 @@ const GetStarted = () => {
     fileInputRef.current?.click();
   };
 
-  const addSuggestionToPrompt = (suggestion: string) => {
-    if (prompt.trim()) {
-      setPrompt(prev => `${prev}, ${suggestion.toLowerCase()}`);
-    } else {
-      setPrompt(suggestion.toLowerCase());
-    }
-  };
-
   const handleGenerateVideo = async () => {
     if (!prompt.trim()) {
       toast.error('Please enter a video description');
@@ -179,181 +165,212 @@ const GetStarted = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <GradientBackdrop variant="section" />
-      <main className="relative z-10">
-        <div className="mx-auto max-w-7xl px-6 py-12">
-          <div className="grid gap-8 lg:grid-cols-[1.2fr,1fr]">
-            {/* Left Column */}
-            <div className="space-y-8">
-              {/* Upload Section */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-                className="space-y-4"
-              >
-                <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold">1. Upload Product Image</h2>
-                  <span className="rounded-full bg-foreground px-3 py-1 text-xs font-medium text-background">
-                    Required
-                  </span>
-                </div>
-                
-                <div
-                  onDragEnter={handleDragEnter}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                  onClick={handleUploadClick}
-                  className={`relative overflow-hidden rounded-2xl border-2 border-dashed transition-all ${
-                    isDragging
-                      ? 'border-primary bg-primary/5 scale-[0.98]'
-                      : uploadedImage
-                      ? 'border-primary/30 bg-muted/30'
-                      : 'border-muted-foreground/30 bg-muted/20 cursor-pointer hover:border-primary/50 hover:bg-muted/40'
-                  }`}
-                  style={{ minHeight: '280px' }}
-                >
-                  {uploadedImage ? (
-                    <div className="relative h-full min-h-[280px]">
-                      <img
-                        src={uploadedImage.url}
-                        alt={uploadedImage.filename}
-                        className="h-full w-full object-contain"
-                      />
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRemoveImage();
-                        }}
-                        className="absolute right-3 top-3 rounded-full bg-background/90 p-2 shadow-lg transition-all hover:bg-destructive hover:text-destructive-foreground"
-                        aria-label="Remove image"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
+    <div className="min-h-screen bg-[#0a0a0a] text-foreground">
+      <main className="relative">
+        {/* Header */}
+        <div className="border-b border-border/10 bg-[#0f0f0f] px-6 py-4">
+          <h1 className="text-lg font-medium text-foreground/90">OpenAI / SORA 2 Pro I2V</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            OpenAI's Sora 2 Pro is new state of the art video and audio generation model.
+          </p>
+        </div>
+
+        <div className="grid lg:grid-cols-2 min-h-[calc(100vh-88px)]">
+          {/* Left Column - Input */}
+          <div className="border-r border-border/10 bg-[#0f0f0f] p-6">
+            <div className="max-w-2xl">
+              <h2 className="text-sm font-medium text-muted-foreground mb-4">Input</h2>
+              
+              <Tabs defaultValue="playground" className="mb-6">
+                <TabsList className="bg-background/50">
+                  <TabsTrigger value="playground">API Playground</TabsTrigger>
+                  <TabsTrigger value="logs">Session logs</TabsTrigger>
+                </TabsList>
+                <TabsContent value="playground" className="space-y-6 mt-6">
+                  {/* Prompt */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground/90">Prompt</label>
+                    <Textarea
+                      placeholder="Describe your video scene..."
+                      value={prompt}
+                      onChange={(e) => setPrompt(e.target.value)}
+                      maxLength={500}
+                      className="min-h-[140px] resize-none bg-background border-border/20 text-foreground"
+                      disabled={isGenerating}
+                    />
+                  </div>
+
+                  {/* Duration */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground/90">Duration</label>
+                    <p className="text-xs text-muted-foreground">Duration in seconds</p>
+                    <div className="flex gap-2">
+                      {durations.map((d) => (
+                        <Button
+                          key={d}
+                          variant={duration === d ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setDuration(d)}
+                          disabled={isGenerating}
+                          className="min-w-[60px]"
+                        >
+                          {d}
+                        </Button>
+                      ))}
                     </div>
-                  ) : (
-                    <div className="flex h-full min-h-[280px] flex-col items-center justify-center p-8 text-center">
-                      <Upload className="mb-4 h-12 w-12 text-muted-foreground/40" />
-                      <p className="mb-2 text-base font-medium text-foreground">
-                        Drop your image here or{' '}
-                        <span className="text-primary">browse</span>
-                      </p>
-                      <p className="mb-4 text-sm text-muted-foreground">
-                        Will be auto-resized to 1280 x 720px
-                      </p>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Info className="h-3.5 w-3.5" />
-                        <span>Supports: JPG, PNG, WebP (Max 10MB)</span>
+                  </div>
+
+                  {/* Image Upload */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground/90">Image</label>
+                    <p className="text-xs text-muted-foreground">
+                      Drag and drop file(s) or provide a base64 encoded data URL
+                    </p>
+                    
+                    {uploadedImage ? (
+                      <div className="relative flex items-center gap-3 rounded-lg border border-border/20 bg-background p-3">
+                        <img
+                          src={uploadedImage.url}
+                          alt={uploadedImage.filename}
+                          className="h-12 w-12 rounded object-cover"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-foreground/80 truncate">{uploadedImage.filename}</p>
+                        </div>
+                        <button
+                          onClick={handleRemoveImage}
+                          className="rounded p-1 hover:bg-destructive/10 transition-colors"
+                          disabled={isGenerating}
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
                       </div>
-                    </div>
-                  )}
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/jpeg,image/jpg,image/png,image/webp"
-                    onChange={handleFileInput}
-                    className="hidden"
-                  />
-                </div>
-              </motion.div>
-
-              {/* Video Description Section */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.1 }}
-                className="space-y-4"
-              >
-                <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold">2. Video Description</h2>
-                  <span className="rounded-full bg-foreground px-3 py-1 text-xs font-medium text-background">
-                    Required
-                  </span>
-                </div>
-
-                <div className="space-y-3">
-                  <label htmlFor="prompt" className="text-sm font-medium text-muted-foreground">
-                    Prompt
-                  </label>
-                  <Textarea
-                    id="prompt"
-                    placeholder="Describe your product teaser video... e.g., 'A sleek smartwatch rotating slowly to showcase its features, with dynamic lighting highlighting the display'"
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    maxLength={500}
-                    className="min-h-[140px] resize-none"
-                    disabled={isGenerating}
-                  />
-                  <div className="flex items-center justify-between text-xs">
-                    <p className="text-muted-foreground">
-                      Be specific about movements, angles, and visual effects
-                    </p>
-                    <p className="text-muted-foreground">
-                      {prompt.length} / 500
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <p className="text-sm font-medium">Quick Suggestions</p>
-                  <div className="flex flex-wrap gap-2">
-                    {quickSuggestions.map((suggestion) => (
-                      <Button
-                        key={suggestion}
-                        variant="outline"
-                        size="sm"
-                        onClick={() => addSuggestionToPrompt(suggestion)}
-                        disabled={isGenerating}
-                        className="rounded-full text-xs"
+                    ) : (
+                      <div
+                        onDragEnter={handleDragEnter}
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        onDrop={handleDrop}
+                        onClick={handleUploadClick}
+                        className={`relative rounded-lg border-2 border-dashed transition-all cursor-pointer ${
+                          isDragging
+                            ? 'border-primary bg-primary/5'
+                            : 'border-border/30 bg-background hover:border-border/50'
+                        }`}
                       >
-                        + {suggestion}
-                      </Button>
-                    ))}
+                        <div className="flex items-center justify-center p-8">
+                          <div className="text-center">
+                            <Upload className="mx-auto h-8 w-8 text-muted-foreground/40 mb-2" />
+                            <p className="text-sm text-muted-foreground">
+                              Enter URL or base64 data
+                            </p>
+                          </div>
+                        </div>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/jpeg,image/jpg,image/png,image/webp"
+                          onChange={handleFileInput}
+                          className="hidden"
+                        />
+                      </div>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      jpeg, jpg, png up to 15 MB (single file)
+                    </p>
                   </div>
-                </div>
 
-                <Button
-                  onClick={handleGenerateVideo}
-                  disabled={isGenerating || !uploadedImage || !prompt.trim()}
-                  className="w-full"
-                  size="lg"
-                >
-                  {isGenerating ? (
-                    <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <Video className="mr-2 h-5 w-5" />
-                      Generate Video
-                    </>
-                  )}
-                </Button>
+                  {/* Additional Settings */}
+                  <details className="group">
+                    <summary className="cursor-pointer text-sm font-medium text-foreground/90 flex items-center justify-between py-2 hover:text-foreground transition-colors">
+                      Additional settings
+                      <svg className="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </summary>
+                    <div className="mt-3 text-sm text-muted-foreground">
+                      Advanced options coming soon...
+                    </div>
+                  </details>
 
-                {generationStatus && (
-                  <div className="rounded-lg bg-primary/10 border border-primary/20 p-4">
-                    <p className="text-sm">{generationStatus}</p>
+                  {/* Cost Info */}
+                  <div className="rounded-lg border border-border/20 bg-background/50 px-4 py-3">
+                    <p className="text-sm text-green-500/80 flex items-center gap-2">
+                      <span className="text-lg">$</span>
+                      A video generation will cost $1.20
+                    </p>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-3 pt-4">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setPrompt('');
+                        setDuration('8s');
+                        setUploadedImage(null);
+                        setGeneratedVideo(null);
+                        setGenerationStatus('');
+                      }}
+                      disabled={isGenerating}
+                    >
+                      Reset
+                    </Button>
+                    <Button
+                      onClick={handleGenerateVideo}
+                      disabled={isGenerating || !uploadedImage || !prompt.trim()}
+                      className="flex-1"
+                    >
+                      {isGenerating ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Running...
+                        </>
+                      ) : (
+                        'Run'
+                      )}
+                    </Button>
+                  </div>
+                </TabsContent>
+                <TabsContent value="logs">
+                  <p className="text-sm text-muted-foreground">No session logs yet</p>
+                </TabsContent>
+              </Tabs>
+            </div>
+          </div>
+
+          {/* Right Column - Result */}
+          <div className="bg-[#0a0a0a] p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-4">
+                <h2 className="text-sm font-medium text-muted-foreground">Result</h2>
+                {isGenerating && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                    <span className="text-green-500">Running</span>
                   </div>
                 )}
-              </motion.div>
+              </div>
+              {generatedVideo && (
+                <a
+                  href={generatedVideo.url}
+                  download
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
+                >
+                  <Download className="h-4 w-4" />
+                  Download video
+                </a>
+              )}
             </div>
 
-            {/* Right Column */}
-            <div className="space-y-6">
-              {/* Video Preview */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.2 }}
-                className="space-y-4"
-              >
-                <h2 className="text-xl font-semibold">Video Preview</h2>
-                
-                {generatedVideo ? (
-                  <div className="overflow-hidden rounded-2xl border border-border bg-muted/20">
+            <Tabs defaultValue="preview">
+              <TabsList className="bg-background/50 mb-4">
+                <TabsTrigger value="preview">Preview</TabsTrigger>
+                <TabsTrigger value="json">JSON</TabsTrigger>
+              </TabsList>
+              <TabsContent value="preview" className="mt-0">
+                <div className="rounded-lg border border-border/10 bg-[#0f0f0f] overflow-hidden min-h-[500px] flex items-center justify-center">
+                  {generatedVideo ? (
                     <video
                       src={generatedVideo.url}
                       controls
@@ -362,63 +379,50 @@ const GetStarted = () => {
                     >
                       Your browser does not support the video tag.
                     </video>
-                    <div className="space-y-3 p-4">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Video ID: {generatedVideo.id}</span>
+                  ) : isGenerating ? (
+                    <div className="text-center p-12">
+                      <div className="inline-block mb-4">
+                        <svg className="w-16 h-16 text-muted-foreground/20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <rect x="3" y="3" width="18" height="18" rx="2" strokeWidth="1.5"/>
+                          <path d="M3 9h18M9 3v18" strokeWidth="1.5"/>
+                        </svg>
                       </div>
-                      <a
-                        href={generatedVideo.url}
-                        download
-                        className="block w-full"
-                      >
-                        <Button variant="outline" className="w-full">
-                          Download Video
-                        </Button>
-                      </a>
+                      <p className="text-sm text-muted-foreground mb-6">Generating video...</p>
+                      {generationStatus && (
+                        <p className="text-xs text-muted-foreground/60 mb-4">{generationStatus}</p>
+                      )}
+                      <div className="max-w-md mx-auto">
+                        <div className="h-1 bg-background rounded-full overflow-hidden">
+                          <div className="h-full bg-primary animate-pulse w-1/3" style={{ transition: 'width 0.3s' }} />
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground/40 mt-4">
+                        Bored? <span className="text-primary/60">Enable Subway Surfer mode...</span>
+                      </p>
                     </div>
-                  </div>
-                ) : (
-                  <div className="flex min-h-[300px] flex-col items-center justify-center rounded-2xl border border-dashed border-muted-foreground/30 bg-muted/10 p-8">
-                    <Video className="mb-4 h-16 w-16 text-muted-foreground/30" />
-                    <p className="text-center text-sm text-muted-foreground">
-                      Your generated video will appear here
-                    </p>
-                  </div>
-                )}
-              </motion.div>
-
-              {/* Pro Tips */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.3 }}
-                className="space-y-4 rounded-xl border border-border bg-muted/10 p-6"
-              >
-                <div className="flex items-center gap-2">
-                  <Lightbulb className="h-5 w-5 text-primary" />
-                  <h3 className="font-semibold">Pro Tips</h3>
+                  ) : (
+                    <div className="text-center p-12">
+                      <div className="inline-block mb-4">
+                        <svg className="w-16 h-16 text-muted-foreground/20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <rect x="3" y="3" width="18" height="18" rx="2" strokeWidth="1.5"/>
+                          <path d="M3 9h18M9 3v18" strokeWidth="1.5"/>
+                        </svg>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Your generated video will appear here
+                      </p>
+                    </div>
+                  )}
                 </div>
-                
-                <ul className="space-y-3">
-                  <li className="flex items-start gap-3 text-sm text-muted-foreground">
-                    <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
-                    <span>Use high-quality product images with clean backgrounds</span>
-                  </li>
-                  <li className="flex items-start gap-3 text-sm text-muted-foreground">
-                    <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
-                    <span>Be specific about camera movements and lighting</span>
-                  </li>
-                  <li className="flex items-start gap-3 text-sm text-muted-foreground">
-                    <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
-                    <span>Include emotional keywords to enhance the mood</span>
-                  </li>
-                  <li className="flex items-start gap-3 text-sm text-muted-foreground">
-                    <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
-                    <span>Generation typically takes 2-5 minutes depending on complexity</span>
-                  </li>
-                </ul>
-              </motion.div>
-            </div>
+              </TabsContent>
+              <TabsContent value="json">
+                <div className="rounded-lg border border-border/10 bg-[#0f0f0f] p-4 min-h-[500px]">
+                  <pre className="text-xs text-muted-foreground">
+                    {generatedVideo ? JSON.stringify(generatedVideo, null, 2) : '{}'}
+                  </pre>
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </main>
