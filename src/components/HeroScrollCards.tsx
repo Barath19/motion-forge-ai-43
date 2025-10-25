@@ -4,8 +4,15 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useEffect, useRef } from 'react';
 import { Play } from 'lucide-react';
-import heroVideo from '@/assets/hero-video.mp4';
-import heroVideo2 from '@/assets/hero-video-2.mp4';
+import teslaVideo from '@/assets/Tesla.mp4';
+import starbucksVideo from '@/assets/Starbucks.mp4';
+import sonyVideo from '@/assets/Sony_PlayStation.mp4';
+import samsungVideo from '@/assets/Samsung_Galaxy.mp4';
+import nikeVideo from '@/assets/Nike_Air_Max.mp4';
+import mcdonaldsVideo from '@/assets/McDonald_s.mp4';
+import lvVideo from '@/assets/Louis_Vuitton.mp4';
+import airpodsVideo from '@/assets/Apple_AirPods.mp4';
+import cokeVideo from '@/assets/Coca-Cola.mp4';
 
 type CardItem = {
   id: string;
@@ -18,22 +25,85 @@ type CardItem = {
 
 const cards: CardItem[] = [
   {
-    id: 'hero-video',
-    title: 'Product Showcase',
-    caption: 'AI-powered video generation in action.',
+    id: 'tesla',
+    title: 'Tesla',
+    caption: 'Electric innovation.',
     className:
-      'bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.35),rgba(10,10,12,0.9)_100%)]',
+      'bg-[radial-gradient(circle_at_top_left,rgba(220,38,38,0.35),rgba(10,10,12,0.9)_100%)]',
     type: 'video',
-    videoSrc: heroVideo
+    videoSrc: teslaVideo
   },
   {
-    id: 'hero-video-2',
-    title: 'Creative Vision',
-    caption: 'Transform ideas into stunning visuals.',
+    id: 'starbucks',
+    title: 'Starbucks',
+    caption: 'Coffee culture.',
     className:
-      'bg-[radial-gradient(circle_at_top_right,rgba(236,72,153,0.35),rgba(10,10,12,0.9)_100%)]',
+      'bg-[radial-gradient(circle_at_top_right,rgba(34,197,94,0.35),rgba(10,10,12,0.9)_100%)]',
     type: 'video',
-    videoSrc: heroVideo2
+    videoSrc: starbucksVideo
+  },
+  {
+    id: 'sony',
+    title: 'Sony PlayStation',
+    caption: 'Gaming excellence.',
+    className:
+      'bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.35),rgba(10,10,12,0.9)_100%)]',
+    type: 'video',
+    videoSrc: sonyVideo
+  },
+  {
+    id: 'samsung',
+    title: 'Samsung Galaxy',
+    caption: 'Mobile innovation.',
+    className:
+      'bg-[radial-gradient(circle_at_top_right,rgba(139,92,246,0.35),rgba(10,10,12,0.9)_100%)]',
+    type: 'video',
+    videoSrc: samsungVideo
+  },
+  {
+    id: 'nike',
+    title: 'Nike Air Max',
+    caption: 'Just do it.',
+    className:
+      'bg-[radial-gradient(circle_at_top_left,rgba(249,115,22,0.35),rgba(10,10,12,0.9)_100%)]',
+    type: 'video',
+    videoSrc: nikeVideo
+  },
+  {
+    id: 'mcdonalds',
+    title: "McDonald's",
+    caption: "I'm lovin' it.",
+    className:
+      'bg-[radial-gradient(circle_at_top_right,rgba(234,179,8,0.35),rgba(10,10,12,0.9)_100%)]',
+    type: 'video',
+    videoSrc: mcdonaldsVideo
+  },
+  {
+    id: 'lv',
+    title: 'Louis Vuitton',
+    caption: 'Luxury redefined.',
+    className:
+      'bg-[radial-gradient(circle_at_top_left,rgba(168,85,247,0.35),rgba(10,10,12,0.9)_100%)]',
+    type: 'video',
+    videoSrc: lvVideo
+  },
+  {
+    id: 'airpods',
+    title: 'Apple AirPods',
+    caption: 'Wireless freedom.',
+    className:
+      'bg-[radial-gradient(circle_at_top_right,rgba(148,163,184,0.35),rgba(10,10,12,0.9)_100%)]',
+    type: 'video',
+    videoSrc: airpodsVideo
+  },
+  {
+    id: 'coke',
+    title: 'Coca-Cola',
+    caption: 'Taste the feeling.',
+    className:
+      'bg-[radial-gradient(circle_at_top_left,rgba(239,68,68,0.35),rgba(10,10,12,0.9)_100%)]',
+    type: 'video',
+    videoSrc: cokeVideo
   }
 ];
 
