@@ -34,62 +34,6 @@ const cards: CardItem[] = [
       'bg-[radial-gradient(circle_at_top_right,rgba(236,72,153,0.35),rgba(10,10,12,0.9)_100%)]',
     type: 'video',
     videoSrc: heroVideo2
-  },
-  {
-    id: 'lighting',
-    title: 'Studio Lighting',
-    caption: 'Cinematic scenes generated in seconds.',
-    className:
-      'bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.28),rgba(255,0,122,0.22)_48%,rgba(10,10,12,0.9)_100%)]'
-  },
-  {
-    id: 'director',
-    title: 'Director Mode',
-    caption: 'AI co-pilot for camera moves and cues.',
-    className:
-      'bg-[radial-gradient(circle_at_top,rgba(77,61,255,0.35),rgba(33,33,46,0.95))]'
-  },
-  {
-    id: 'team',
-    title: 'Team Sync',
-    caption: 'Share iterations and approvals instantly.',
-    className:
-      'bg-[radial-gradient(circle_at_bottom_right,rgba(33,246,255,0.32),rgba(18,18,24,0.94))]'
-  },
-  {
-    id: 'brands',
-    title: 'Brand Palettes',
-    caption: '64+ brand packs applied automatically.',
-    className:
-      'bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.22),rgba(26,26,30,0.95))]'
-  },
-  {
-    id: 'audio',
-    title: 'Audio Cues',
-    caption: 'Auto-sync soundbeds with motion beats.',
-    className:
-      'bg-[radial-gradient(circle_at_top_right,rgba(255,149,0,0.28),rgba(18,18,30,0.94))]'
-  },
-  {
-    id: 'collab',
-    title: 'Live Collaboration',
-    caption: 'Directors and editors iterate in real time.',
-    className:
-      'bg-[radial-gradient(circle_at_bottom_left,rgba(0,176,255,0.32),rgba(20,20,28,0.92))]'
-  },
-  {
-    id: 'shots',
-    title: 'Shot Locker',
-    caption: 'Bookmark hero frames for instant reuse.',
-    className:
-      'bg-[radial-gradient(circle_at_center,rgba(111,255,213,0.26),rgba(18,18,24,0.95))]'
-  },
-  {
-    id: 'handoff',
-    title: 'Seamless Handoff',
-    caption: 'Export markers straight into Premiere.',
-    className:
-      'bg-[radial-gradient(circle_at_bottom,rgba(255,86,164,0.28),rgba(24,24,30,0.95))]'
   }
 ];
 
