@@ -27,7 +27,7 @@ const Hero = () => {
                 as="span"
                 direction="up"
                 text="Meet"
-                className="pb-2 font-meet italic text-4xl tracking-[0.18em] text-white/90 md:text-5xl md:tracking-[0.22em]"
+                className="pb-2 font-meet italic text-4xl tracking-[0.05em] text-white/90 md:text-5xl md:tracking-[0.08em]"
               />
                 <BlurIn
                   as="span"
