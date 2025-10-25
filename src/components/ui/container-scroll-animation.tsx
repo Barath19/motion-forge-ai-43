@@ -11,6 +11,7 @@ export const ContainerScroll = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
+    offset: ["start start", "end start"],
   });
   const [isMobile, setIsMobile] = React.useState(false);
 
@@ -29,9 +30,21 @@ export const ContainerScroll = ({
     return isMobile ? [0.7, 0.9] : [1.05, 1];
   };
 
-  const rotate = useTransform(scrollYProgress, [0, 1], [20, 0]);
-  const scale = useTransform(scrollYProgress, [0, 1], scaleDimensions());
-  const translate = useTransform(scrollYProgress, [0, 1], [0, -100]);
+  const rotate = useTransform(
+    scrollYProgress,
+    [0, 0.5, 1],
+    [25, 10, 0]
+  );
+  const scale = useTransform(
+    scrollYProgress,
+    [0, 0.5, 1],
+    isMobile ? [0.7, 0.85, 0.9] : [1.05, 1.025, 1]
+  );
+  const translate = useTransform(
+    scrollYProgress,
+    [0, 1],
+    [0, -100]
+  );
 
   return (
     <div
