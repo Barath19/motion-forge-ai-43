@@ -117,7 +117,7 @@ const HeroScrollCards = () => {
     gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
       gsap.to(listEl, {
-        xPercent: -40,
+        xPercent: 40,
         ease: 'none',
         scrollTrigger: {
           trigger: listEl,
