@@ -5,6 +5,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useEffect, useRef } from 'react';
 import { Play } from 'lucide-react';
 import heroVideo from '@/assets/hero-video.mp4';
+import heroVideo2 from '@/assets/hero-video-2.mp4';
 
 type CardItem = {
   id: string;
@@ -24,6 +25,15 @@ const cards: CardItem[] = [
       'bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.35),rgba(10,10,12,0.9)_100%)]',
     type: 'video',
     videoSrc: heroVideo
+  },
+  {
+    id: 'hero-video-2',
+    title: 'Creative Vision',
+    caption: 'Transform ideas into stunning visuals.',
+    className:
+      'bg-[radial-gradient(circle_at_top_right,rgba(236,72,153,0.35),rgba(10,10,12,0.9)_100%)]',
+    type: 'video',
+    videoSrc: heroVideo2
   },
   {
     id: 'lighting',
