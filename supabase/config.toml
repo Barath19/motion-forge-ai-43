@@ -1,1 +1,10 @@
 project_id = "dsqhrenlenlsywallwzq"
+
+[functions.create-video]
+verify_jwt = false
+
+[functions.check-video-status]
+verify_jwt = false
+
+[functions.download-video]
+verify_jwt = false
