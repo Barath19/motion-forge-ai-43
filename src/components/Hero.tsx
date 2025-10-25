@@ -1,4 +1,5 @@
 import { ContainerScroll } from '@/components/ui/container-scroll-animation';
+import PrismaticBurst from '@/components/PrismaticBurst';
 
 const Hero = () => {
   return (
@@ -19,15 +20,19 @@ const Hero = () => {
           </>
         }
       >
-        <div className="w-full h-full rounded-2xl overflow-hidden bg-gradient-to-br from-primary/30 to-accent/30">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center">
-              <div className="w-20 h-20 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center mx-auto mb-4">
-                <div className="w-0 h-0 border-l-[16px] border-l-white/80 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent ml-1"></div>
-              </div>
-              <p className="text-sm text-muted-foreground">15s Promo · Orbit Sneakers</p>
-            </div>
-          </div>
+        <div className="w-full h-full relative">
+          <PrismaticBurst
+            animationType="rotate3d"
+            intensity={2}
+            speed={0.5}
+            distort={1.0}
+            paused={false}
+            offset={{ x: 0, y: 0 }}
+            hoverDampness={0.25}
+            rayCount={24}
+            mixBlendMode="lighten"
+            colors={['#ff007a', '#4d3dff', '#ffffff']}
+          />
         </div>
       </ContainerScroll>
     </div>
