@@ -4,15 +4,27 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useEffect, useRef } from 'react';
 import { Play } from 'lucide-react';
+import heroVideo from '@/assets/hero-video.mp4';
 
 type CardItem = {
   id: string;
   title: string;
   caption: string;
   className: string;
+  type?: 'feature' | 'video';
+  videoSrc?: string;
 };
 
 const cards: CardItem[] = [
+  {
+    id: 'hero-video',
+    title: 'Product Showcase',
+    caption: 'AI-powered video generation in action.',
+    className:
+      'bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.35),rgba(10,10,12,0.9)_100%)]',
+    type: 'video',
+    videoSrc: heroVideo
+  },
   {
     id: 'lighting',
     title: 'Studio Lighting',
@@ -112,14 +124,25 @@ const HeroScrollCards = () => {
             className={`flex h-[360px] md:h-[420px] w-auto flex-col overflow-hidden rounded-[32px] border border-white/15 p-7 text-left text-white shadow-[0_18px_45px_rgba(6,7,12,0.45)] ${card.className}`}
             style={{ aspectRatio: '9 / 16' }}
           >
-            <div className="flex flex-1 items-center justify-center">
-              <button
-                type="button"
-                className="group inline-flex h-16 w-16 items-center justify-center rounded-full border border-white/40 bg-white/10 backdrop-blur transition-all duration-300 hover:border-white/60 hover:bg-white/20"
-                aria-label="Play preview"
-              >
-                <Play className="h-6 w-6 text-white transition-transform duration-300 group-hover:scale-110" />
-              </button>
+            <div className="flex flex-1 items-center justify-center relative overflow-hidden rounded-2xl">
+              {card.type === 'video' && card.videoSrc ? (
+                <video
+                  src={card.videoSrc}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              ) : (
+                <button
+                  type="button"
+                  className="group inline-flex h-16 w-16 items-center justify-center rounded-full border border-white/40 bg-white/10 backdrop-blur transition-all duration-300 hover:border-white/60 hover:bg-white/20"
+                  aria-label="Play preview"
+                >
+                  <Play className="h-6 w-6 text-white transition-transform duration-300 group-hover:scale-110" />
+                </button>
+              )}
             </div>
             <div className="pt-6 text-xs font-medium uppercase tracking-[0.3em] text-white/60">
               FrameLab
