@@ -1,12 +1,10 @@
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useState, useRef } from 'react';
-import { Upload, X, Video, Loader2 } from 'lucide-react';
+import { Upload, X, Video, Loader2, Check, Info, Lightbulb } from 'lucide-react';
 import GradientBackdrop from '@/components/GradientBackdrop';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
 import { resizeImageTo1280x720 } from '@/utils/imageProcessing';
 import { 
   createVideoJob, 
@@ -16,10 +14,8 @@ import {
 } from '@/utils/videoGeneration';
 
 interface UploadedImage {
-  id: string;
   url: string;
   filename: string;
-  size: number;
   file: File;
 }
 
@@ -29,17 +25,22 @@ interface GeneratedVideo {
   jobId: string;
 }
 
+const quickSuggestions = [
+  'Smooth rotation',
+  'Dynamic zoom',
+  'Studio lighting',
+  'Premium feel',
+  'Cinematic angles',
+  'Slow motion',
+];
+
 const GetStarted = () => {
-  const [images, setImages] = useState<UploadedImage[]>([]);
+  const [uploadedImage, setUploadedImage] = useState<UploadedImage | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
   const [prompt, setPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationStatus, setGenerationStatus] = useState<string>('');
   const [generatedVideo, setGeneratedVideo] = useState<GeneratedVideo | null>(null);
-  const [includeProductDemo, setIncludeProductDemo] = useState(false);
-  const [includeCallToAction, setIncludeCallToAction] = useState(false);
-  const [includeBranding, setIncludeBranding] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDragEnter = (e: React.DragEvent) => {
@@ -60,35 +61,30 @@ const GetStarted = () => {
   };
 
   const processFiles = (files: FileList) => {
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
-    const newImages: UploadedImage[] = [];
-
-    Array.from(files).forEach((file) => {
-      if (!validTypes.includes(file.type)) {
-        toast.error(`${file.name} is not a valid image type`);
-        return;
-      }
-
-      const url = URL.createObjectURL(file);
-      const image: UploadedImage = {
-        id: `${Date.now()}-${Math.random()}`,
-        url,
-        filename: file.name,
-        size: file.size,
-        file,
-      };
-      newImages.push(image);
-    });
-
-    if (newImages.length > 0) {
-      setImages((prev) => [...prev, ...newImages]);
-      toast.success(`${newImages.length} image${newImages.length > 1 ? 's' : ''} uploaded`);
-      
-      // Auto-select first image if none selected
-      if (!selectedImageId && newImages.length > 0) {
-        setSelectedImageId(newImages[0].id);
-      }
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    
+    const file = files[0];
+    
+    if (!file) return;
+    
+    if (!validTypes.includes(file.type)) {
+      toast.error('Please upload a JPG, PNG, or WebP image');
+      return;
     }
+    
+    if (file.size > maxSize) {
+      toast.error('Image must be less than 10MB');
+      return;
+    }
+
+    const url = URL.createObjectURL(file);
+    setUploadedImage({
+      url,
+      filename: file.name,
+      file,
+    });
+    toast.success('Image uploaded successfully');
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -112,34 +108,34 @@ const GetStarted = () => {
     }
   };
 
-  const handleDelete = (id: string) => {
-    setImages((prev) => {
-      const imageToDelete = prev.find((img) => img.id === id);
-      if (imageToDelete) {
-        URL.revokeObjectURL(imageToDelete.url);
-      }
-      if (selectedImageId === id) {
-        setSelectedImageId(null);
-      }
-      return prev.filter((img) => img.id !== id);
-    });
-    toast.success('Image deleted');
+  const handleRemoveImage = () => {
+    if (uploadedImage) {
+      URL.revokeObjectURL(uploadedImage.url);
+      setUploadedImage(null);
+      toast.success('Image removed');
+    }
   };
 
   const handleUploadClick = () => {
     fileInputRef.current?.click();
   };
 
+  const addSuggestionToPrompt = (suggestion: string) => {
+    if (prompt.trim()) {
+      setPrompt(prev => `${prev}, ${suggestion.toLowerCase()}`);
+    } else {
+      setPrompt(suggestion.toLowerCase());
+    }
+  };
+
   const handleGenerateVideo = async () => {
     if (!prompt.trim()) {
-      toast.error('Please enter a prompt for your video');
+      toast.error('Please enter a video description');
       return;
     }
-
-    const selectedImage = images.find((img) => img.id === selectedImageId);
     
-    if (!selectedImage) {
-      toast.error('Please select an image for the video reference');
+    if (!uploadedImage) {
+      toast.error('Please upload a product image');
       return;
     }
 
@@ -147,40 +143,22 @@ const GetStarted = () => {
     setGenerationStatus('Preparing image...');
 
     try {
-      // Resize image to 1280x720
-      const resizedImage = await resizeImageTo1280x720(selectedImage.file);
+      const resizedImage = await resizeImageTo1280x720(uploadedImage.file);
       
-      // Build enhanced prompt with selected elements
-      let enhancedPrompt = prompt;
-      if (includeProductDemo) {
-        enhancedPrompt += ' Include dynamic product demonstration shots.';
-      }
-      if (includeCallToAction) {
-        enhancedPrompt += ' End with an engaging call-to-action.';
-      }
-      if (includeBranding) {
-        enhancedPrompt += ' Maintain consistent branding throughout.';
-      }
-
       setGenerationStatus('Creating video job...');
-      
-      // Create video job
       const job = await createVideoJob({
-        prompt: enhancedPrompt,
+        prompt,
         image: resizedImage,
       });
 
       toast.success(`Video job created: ${job.id}`);
       setGenerationStatus(`Generating video... (${job.status})`);
 
-      // Poll for completion
       const completedJob = await pollForVideoCompletion(job.id, (currentJob: VideoJob) => {
         setGenerationStatus(`Generating video... ${currentJob.status} ${currentJob.progress ? `(${currentJob.progress}%)` : ''}`);
       });
 
       setGenerationStatus('Downloading and saving video...');
-      
-      // Download and store video
       const result = await downloadAndStoreVideo(completedJob.id);
 
       setGeneratedVideo({
@@ -201,174 +179,145 @@ const GetStarted = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-background text-foreground">
       <GradientBackdrop variant="section" />
       <main className="relative z-10">
-        <div className="mx-auto max-w-7xl px-6 py-20">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="mb-12"
-          >
-            <h1 className="mb-4 text-5xl font-bold">Video Studio</h1>
-            <p className="text-xl text-white/80">Create product teaser videos with AI</p>
-            {images.length > 0 && (
-              <p className="mt-2 text-sm text-white/60">{images.length} image{images.length > 1 ? 's' : ''} uploaded</p>
-            )}
-          </motion.div>
-
-          <div className="grid gap-8 lg:grid-cols-2">
-            {/* Left Column - Image Upload */}
-            <div className="space-y-6">
-              <h2 className="text-2xl font-semibold">1. Upload Reference Image</h2>
-              
-              <div className="grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.2 }}
-                  className="aspect-square"
+        <div className="mx-auto max-w-7xl px-6 py-12">
+          <div className="grid gap-8 lg:grid-cols-[1.2fr,1fr]">
+            {/* Left Column */}
+            <div className="space-y-8">
+              {/* Upload Section */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+                className="space-y-4"
+              >
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-semibold">1. Upload Product Image</h2>
+                  <span className="rounded-full bg-foreground px-3 py-1 text-xs font-medium text-background">
+                    Required
+                  </span>
+                </div>
+                
+                <div
+                  onDragEnter={handleDragEnter}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  onClick={handleUploadClick}
+                  className={`relative overflow-hidden rounded-2xl border-2 border-dashed transition-all ${
+                    isDragging
+                      ? 'border-primary bg-primary/5 scale-[0.98]'
+                      : uploadedImage
+                      ? 'border-primary/30 bg-muted/30'
+                      : 'border-muted-foreground/30 bg-muted/20 cursor-pointer hover:border-primary/50 hover:bg-muted/40'
+                  }`}
+                  style={{ minHeight: '280px' }}
                 >
-                  <div
-                    onDragEnter={handleDragEnter}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
-                    onClick={handleUploadClick}
-                    className={`flex h-full w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition-all duration-300 ${
-                      isDragging
-                        ? 'border-primary bg-primary/10 scale-[1.02]'
-                        : 'border-white/20 bg-white/5 hover:border-primary/50 hover:bg-white/10'
-                    }`}
-                  >
-                    <Upload className="mb-2 h-8 w-8 text-white/60" />
-                    <p className="text-xs font-medium text-white/80">Upload</p>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onChange={handleFileInput}
-                      className="hidden"
-                    />
-                  </div>
-                </motion.div>
-
-                {images.length > 0 && (
-                  <AnimatePresence>
-                    {images.map((image) => (
-                      <motion.div
-                        key={image.id}
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        transition={{ duration: 0.3 }}
-                        onClick={() => setSelectedImageId(image.id)}
-                        className={`group relative aspect-square overflow-hidden rounded-xl cursor-pointer transition-all ${
-                          selectedImageId === image.id
-                            ? 'ring-4 ring-primary bg-primary/20'
-                            : 'bg-white/5 hover:ring-2 hover:ring-white/30'
-                        }`}
+                  {uploadedImage ? (
+                    <div className="relative h-full min-h-[280px]">
+                      <img
+                        src={uploadedImage.url}
+                        alt={uploadedImage.filename}
+                        className="h-full w-full object-contain"
+                      />
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveImage();
+                        }}
+                        className="absolute right-3 top-3 rounded-full bg-background/90 p-2 shadow-lg transition-all hover:bg-destructive hover:text-destructive-foreground"
+                        aria-label="Remove image"
                       >
-                        <img
-                          src={image.url}
-                          alt={image.filename}
-                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
-                        />
-                        <div className="absolute inset-0 bg-black/0 transition-all duration-300 group-hover:bg-black/40" />
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(image.id);
-                          }}
-                          className="absolute right-1 top-1 rounded-full bg-black/70 p-1.5 opacity-0 transition-all duration-300 hover:bg-red-500 group-hover:opacity-100"
-                          aria-label="Delete image"
-                        >
-                          <X className="h-3 w-3 text-white" />
-                        </button>
-                        {selectedImageId === image.id && (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="rounded-full bg-primary p-2">
-                              <Video className="h-4 w-4 text-white" />
-                            </div>
-                          </div>
-                        )}
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                )}
-              </div>
-            </div>
-
-            {/* Right Column - Video Generation Form */}
-            <div className="space-y-6">
-              <h2 className="text-2xl font-semibold">2. Configure Your Video</h2>
-              
-              <div className="space-y-4 rounded-xl border border-white/10 bg-white/5 p-6">
-                <div className="space-y-2">
-                  <Label htmlFor="prompt" className="text-lg">Video Description</Label>
-                  <Textarea
-                    id="prompt"
-                    placeholder="Describe your product teaser video... (e.g., 'A sleek smartphone floating in space with dynamic lighting')"
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    className="min-h-[120px] bg-black/50 border-white/20 text-white placeholder:text-white/40"
-                    disabled={isGenerating}
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex h-full min-h-[280px] flex-col items-center justify-center p-8 text-center">
+                      <Upload className="mb-4 h-12 w-12 text-muted-foreground/40" />
+                      <p className="mb-2 text-base font-medium text-foreground">
+                        Drop your image here or{' '}
+                        <span className="text-primary">browse</span>
+                      </p>
+                      <p className="mb-4 text-sm text-muted-foreground">
+                        Will be auto-resized to 1280 x 720px
+                      </p>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Info className="h-3.5 w-3.5" />
+                        <span>Supports: JPG, PNG, WebP (Max 10MB)</span>
+                      </div>
+                    </div>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/webp"
+                    onChange={handleFileInput}
+                    className="hidden"
                   />
+                </div>
+              </motion.div>
+
+              {/* Video Description Section */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.1 }}
+                className="space-y-4"
+              >
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-semibold">2. Video Description</h2>
+                  <span className="rounded-full bg-foreground px-3 py-1 text-xs font-medium text-background">
+                    Required
+                  </span>
                 </div>
 
                 <div className="space-y-3">
-                  <Label className="text-base">Video Elements</Label>
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="product-demo"
-                        checked={includeProductDemo}
-                        onCheckedChange={(checked) => setIncludeProductDemo(checked as boolean)}
-                        disabled={isGenerating}
-                      />
-                      <label htmlFor="product-demo" className="text-sm text-white/80 cursor-pointer">
-                        Include product demonstration
-                      </label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="call-to-action"
-                        checked={includeCallToAction}
-                        onCheckedChange={(checked) => setIncludeCallToAction(checked as boolean)}
-                        disabled={isGenerating}
-                      />
-                      <label htmlFor="call-to-action" className="text-sm text-white/80 cursor-pointer">
-                        Add call-to-action ending
-                      </label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="branding"
-                        checked={includeBranding}
-                        onCheckedChange={(checked) => setIncludeBranding(checked as boolean)}
-                        disabled={isGenerating}
-                      />
-                      <label htmlFor="branding" className="text-sm text-white/80 cursor-pointer">
-                        Maintain consistent branding
-                      </label>
-                    </div>
+                  <label htmlFor="prompt" className="text-sm font-medium text-muted-foreground">
+                    Prompt
+                  </label>
+                  <Textarea
+                    id="prompt"
+                    placeholder="Describe your product teaser video... e.g., 'A sleek smartwatch rotating slowly to showcase its features, with dynamic lighting highlighting the display'"
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    maxLength={500}
+                    className="min-h-[140px] resize-none"
+                    disabled={isGenerating}
+                  />
+                  <div className="flex items-center justify-between text-xs">
+                    <p className="text-muted-foreground">
+                      Be specific about movements, angles, and visual effects
+                    </p>
+                    <p className="text-muted-foreground">
+                      {prompt.length} / 500
+                    </p>
                   </div>
                 </div>
 
-                <div className="space-y-2 pt-4">
-                  <p className="text-xs text-white/60">
-                    • 12 seconds duration<br />
-                    • 1280x720 landscape format<br />
-                    • Powered by OpenAI Sora 2
-                  </p>
+                <div className="space-y-3">
+                  <p className="text-sm font-medium">Quick Suggestions</p>
+                  <div className="flex flex-wrap gap-2">
+                    {quickSuggestions.map((suggestion) => (
+                      <Button
+                        key={suggestion}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => addSuggestionToPrompt(suggestion)}
+                        disabled={isGenerating}
+                        className="rounded-full text-xs"
+                      >
+                        + {suggestion}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
 
                 <Button
                   onClick={handleGenerateVideo}
-                  disabled={isGenerating || !selectedImageId || !prompt.trim()}
-                  className="w-full bg-primary hover:bg-primary/90 text-white"
+                  disabled={isGenerating || !uploadedImage || !prompt.trim()}
+                  className="w-full"
                   size="lg"
                 >
                   {isGenerating ? (
@@ -386,44 +335,91 @@ const GetStarted = () => {
 
                 {generationStatus && (
                   <div className="rounded-lg bg-primary/10 border border-primary/20 p-4">
-                    <p className="text-sm text-white/90">{generationStatus}</p>
+                    <p className="text-sm">{generationStatus}</p>
                   </div>
                 )}
-              </div>
+              </motion.div>
+            </div>
+
+            {/* Right Column */}
+            <div className="space-y-6">
+              {/* Video Preview */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.2 }}
+                className="space-y-4"
+              >
+                <h2 className="text-xl font-semibold">Video Preview</h2>
+                
+                {generatedVideo ? (
+                  <div className="overflow-hidden rounded-2xl border border-border bg-muted/20">
+                    <video
+                      src={generatedVideo.url}
+                      controls
+                      className="w-full"
+                      autoPlay
+                    >
+                      Your browser does not support the video tag.
+                    </video>
+                    <div className="space-y-3 p-4">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Video ID: {generatedVideo.id}</span>
+                      </div>
+                      <a
+                        href={generatedVideo.url}
+                        download
+                        className="block w-full"
+                      >
+                        <Button variant="outline" className="w-full">
+                          Download Video
+                        </Button>
+                      </a>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex min-h-[300px] flex-col items-center justify-center rounded-2xl border border-dashed border-muted-foreground/30 bg-muted/10 p-8">
+                    <Video className="mb-4 h-16 w-16 text-muted-foreground/30" />
+                    <p className="text-center text-sm text-muted-foreground">
+                      Your generated video will appear here
+                    </p>
+                  </div>
+                )}
+              </motion.div>
+
+              {/* Pro Tips */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.3 }}
+                className="space-y-4 rounded-xl border border-border bg-muted/10 p-6"
+              >
+                <div className="flex items-center gap-2">
+                  <Lightbulb className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold">Pro Tips</h3>
+                </div>
+                
+                <ul className="space-y-3">
+                  <li className="flex items-start gap-3 text-sm text-muted-foreground">
+                    <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
+                    <span>Use high-quality product images with clean backgrounds</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-sm text-muted-foreground">
+                    <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
+                    <span>Be specific about camera movements and lighting</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-sm text-muted-foreground">
+                    <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
+                    <span>Include emotional keywords to enhance the mood</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-sm text-muted-foreground">
+                    <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
+                    <span>Generation typically takes 2-5 minutes depending on complexity</span>
+                  </li>
+                </ul>
+              </motion.div>
             </div>
           </div>
-
-          {/* Generated Video Display */}
-          {generatedVideo && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="mt-12"
-            >
-              <h2 className="mb-6 text-3xl font-semibold">Generated Video</h2>
-              <div className="overflow-hidden rounded-2xl border border-white/20 bg-white/5 p-4">
-                <video
-                  src={generatedVideo.url}
-                  controls
-                  className="w-full rounded-lg"
-                  autoPlay
-                >
-                  Your browser does not support the video tag.
-                </video>
-                <div className="mt-4 flex items-center justify-between">
-                  <p className="text-sm text-white/60">Video ID: {generatedVideo.id}</p>
-                  <a
-                    href={generatedVideo.url}
-                    download
-                    className="text-sm text-primary hover:underline"
-                  >
-                    Download Video
-                  </a>
-                </div>
-              </div>
-            </motion.div>
-          )}
         </div>
       </main>
     </div>
