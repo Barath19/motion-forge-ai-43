@@ -56,9 +56,11 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground font-['Plus_Jakarta_Sans',sans-serif] antialiased;
-    background: radial-gradient(ellipse at 20% 30%, hsl(var(--primary) / 0.15) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 70%, hsl(var(--accent) / 0.1) 0%, transparent 50%),
-                hsl(var(--background));
+    background:
+      radial-gradient(circle at 50% 25%, hsla(272, 86%, 30%, 0.55) 0%, hsla(264, 72%, 18%, 0.38) 38%, rgba(8, 6, 20, 0.75) 62%, rgba(0, 0, 0, 0.92) 100%),
+      radial-gradient(circle at 10% 80%, hsla(260, 95%, 32%, 0.24) 0%, hsla(260, 95%, 32%, 0.08) 32%, transparent 70%),
+      radial-gradient(circle at 90% 85%, hsla(224, 82%, 22%, 0.22) 0%, hsla(224, 82%, 22%, 0.06) 30%, transparent 65%),
+      linear-gradient(180deg, hsl(248 60% 10%) 0%, hsl(230 54% 7%) 55%, hsl(214 58% 4%) 100%);
     overflow-x: hidden;
   }
 

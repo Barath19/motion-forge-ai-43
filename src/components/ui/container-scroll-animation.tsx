@@ -3,8 +3,10 @@ import { useScroll, useTransform, motion, MotionValue } from "framer-motion";
 
 export const ContainerScroll = ({
   titleComponent,
+  children,
 }: {
   titleComponent: string | React.ReactNode;
+  children?: React.ReactNode;
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
@@ -85,7 +87,9 @@ export const ContainerScroll = ({
         }}
       >
         <Header translate={headlineTranslate} titleComponent={titleComponent} />
-        <Card rotate={rotate} translate={cardTranslate} scale={cardScale} />
+        <Card rotate={rotate} translate={cardTranslate} scale={cardScale}>
+          {children}
+        </Card>
       </div>
     </div>
   );
@@ -108,9 +112,10 @@ type CardProps = {
   rotate: MotionValue<number>;
   scale: MotionValue<number>;
   translate: MotionValue<number>;
+  children?: React.ReactNode;
 };
 
-export const Card = ({ rotate, scale, translate }: CardProps) => {
+export const Card = ({ rotate, scale, translate, children }: CardProps) => {
   return (
     <motion.div
       style={{
@@ -126,10 +131,11 @@ export const Card = ({ rotate, scale, translate }: CardProps) => {
       <div className="pointer-events-none absolute inset-[6px] rounded-[34px] border border-white/5 opacity-40" />
       <div className="pointer-events-none absolute inset-[10px] rounded-[30px] bg-gradient-to-br from-white/[0.08] via-transparent to-transparent opacity-70" />
 
-      <div className="relative z-10 h-full w-full overflow-hidden rounded-[28px] border border-white/10 bg-black" aria-hidden="true">
+      <div className="relative z-10 h-full w-full overflow-hidden rounded-[28px] border border-white/10 bg-black">
         <div className="absolute inset-0 bg-black" />
-        <span className="pointer-events-none absolute left-1/2 top-4 z-10 h-1.5 w-14 -translate-x-1/2 rounded-full bg-white/15 blur-[0.5px]" />
-        <span className="pointer-events-none absolute left-1/2 top-6 z-10 h-3 w-3 -translate-x-1/2 rounded-full bg-[#0a0f27] shadow-[inset_0_0_4px_rgba(255,255,255,0.12)]" />
+        <div className="relative flex h-full w-full items-center justify-center">{children}</div>
+        <span className="pointer-events-none absolute left-1/2 top-4 z-20 h-1.5 w-14 -translate-x-1/2 rounded-full bg-white/15 blur-[0.5px]" />
+        <span className="pointer-events-none absolute left-1/2 top-6 z-20 h-3 w-3 -translate-x-1/2 rounded-full bg-[#0a0f27] shadow-[inset_0_0_4px_rgba(255,255,255,0.12)]" />
       </div>
     </motion.div>
   );

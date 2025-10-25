@@ -1,9 +1,12 @@
+import Builder from '@/components/Builder';
+import Features from '@/components/Features';
 import GradientBackdrop from '@/components/GradientBackdrop';
 import Hero from '@/components/Hero';
+import Workflow from '@/components/Workflow';
 
 const Index = () => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-transparent text-white">
       <main>
         <Hero />
         <section className="relative min-h-screen overflow-hidden bg-black text-white">
@@ -22,6 +25,9 @@ const Index = () => {
             </div>
           </div>
         </section>
+        <Features />
+        <Workflow />
+        <Builder />
       </main>
     </div>
   );
