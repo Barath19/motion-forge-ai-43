@@ -47,16 +47,18 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        sidebar: {
-          DEFAULT: "hsl(var(--sidebar-background))",
-          foreground: "hsl(var(--sidebar-foreground))",
-          primary: "hsl(var(--sidebar-primary))",
-          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-          accent: "hsl(var(--sidebar-accent))",
-          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
-          border: "hsl(var(--sidebar-border))",
-          ring: "hsl(var(--sidebar-ring))",
+        glass: {
+          DEFAULT: "hsl(var(--glass-bg))",
+          border: "hsl(var(--glass-border))",
         },
+      },
+      boxShadow: {
+        glow: '0 24px 60px rgba(11, 18, 40, 0.45)',
+        'glow-primary': '0 0 60px hsl(var(--primary) / 0.3)',
+        'glow-accent': '0 0 40px hsl(var(--accent) / 0.3)',
+      },
+      backdropBlur: {
+        glass: '18px',
       },
       borderRadius: {
         lg: "var(--radius)",
