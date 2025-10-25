@@ -37,7 +37,7 @@ const HeroScreenMarquee = () => {
   );
 
   return (
-    <div className="flex w-full items-center justify-center overflow-hidden bg-black py-8">
+    <div className="flex w-full items-center justify-center overflow-hidden bg-black py-16">
       <div
         ref={textRef}
         className="whitespace-nowrap font-marquee text-2xl font-semibold uppercase tracking-[0.1em] text-white/80 md:text-3xl"
