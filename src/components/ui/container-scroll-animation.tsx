@@ -3,30 +3,37 @@ import { useScroll, useTransform, motion, MotionValue } from "framer-motion";
 
 export const ContainerScroll = ({
   titleComponent,
-  children,
 }: {
   titleComponent: string | React.ReactNode;
-  children: React.ReactNode;
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end start"],
   });
-  const [isMobile, setIsMobile] = React.useState(false);
+  const [viewportType, setViewportType] = React.useState<
+    "mobile" | "tablet" | "desktop"
+  >("desktop");
   const [viewportHeight, setViewportHeight] = React.useState(() => {
     if (typeof window === "undefined") return 900;
     return window.innerHeight;
   });
 
   React.useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
+    const detectViewport = () => {
+      const width = window.innerWidth;
+      if (width <= 768) {
+        setViewportType("mobile");
+      } else if (width <= 1180) {
+        setViewportType("tablet");
+      } else {
+        setViewportType("desktop");
+      }
     };
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
+    detectViewport();
+    window.addEventListener("resize", detectViewport);
     return () => {
-      window.removeEventListener("resize", checkMobile);
+      window.removeEventListener("resize", detectViewport);
     };
   }, []);
 
@@ -45,13 +52,16 @@ export const ContainerScroll = ({
     [0, 0.5, 1],
     [25, 12, 4]
   );
-  const cardScale = useTransform(
-    scrollYProgress,
-    [0, 0.5, 1],
-    isMobile ? [0.9, 1.1, 1.35] : [1.05, 1.25, 1.55]
-  );
+  const scaleKeyframes =
+    viewportType === "mobile"
+      ? [0.92, 1.08, 1.25]
+      : viewportType === "tablet"
+      ? [1, 1.16, 1.32]
+      : [1.05, 1.22, 1.42];
+  const cardScale = useTransform(scrollYProgress, [0, 0.5, 1], scaleKeyframes);
   const headlineTranslate = useTransform(scrollYProgress, [0, 1], [-90, -240]);
-  const baseCardHeightRem = isMobile ? 30 : 40;
+  const baseCardHeightRem =
+    viewportType === "mobile" ? 30 : viewportType === "tablet" ? 36 : 40;
   const cardHeightPx = baseCardHeightRem * 16;
   const centerTranslate = React.useMemo(
     () => Math.max(0, viewportHeight / 2 - cardHeightPx / 2),
@@ -75,9 +85,7 @@ export const ContainerScroll = ({
         }}
       >
         <Header translate={headlineTranslate} titleComponent={titleComponent} />
-        <Card rotate={rotate} translate={cardTranslate} scale={cardScale}>
-          {children}
-        </Card>
+        <Card rotate={rotate} translate={cardTranslate} scale={cardScale} />
       </div>
     </div>
   );
@@ -96,17 +104,13 @@ export const Header = ({ translate, titleComponent }: any) => {
   );
 };
 
-export const Card = ({
-  rotate,
-  scale,
-  translate,
-  children,
-}: {
+type CardProps = {
   rotate: MotionValue<number>;
   scale: MotionValue<number>;
   translate: MotionValue<number>;
-  children: React.ReactNode;
-}) => {
+};
+
+export const Card = ({ rotate, scale, translate }: CardProps) => {
   return (
     <motion.div
       style={{
@@ -122,10 +126,10 @@ export const Card = ({
       <div className="pointer-events-none absolute inset-[6px] rounded-[34px] border border-white/5 opacity-40" />
       <div className="pointer-events-none absolute inset-[10px] rounded-[30px] bg-gradient-to-br from-white/[0.08] via-transparent to-transparent opacity-70" />
 
-      <div className="relative z-10 h-full w-full overflow-hidden rounded-[28px] border border-white/10 bg-black">
-        <span className="pointer-events-none absolute left-1/2 top-4 h-1.5 w-14 -translate-x-1/2 rounded-full bg-white/15 blur-[0.5px]" />
-        <span className="pointer-events-none absolute left-1/2 top-6 h-3 w-3 -translate-x-1/2 rounded-full bg-[#0a0f27] shadow-[inset_0_0_4px_rgba(255,255,255,0.12)]" />
-        <div className="relative z-10 h-full w-full md:p-4">{children}</div>
+      <div className="relative z-10 h-full w-full overflow-hidden rounded-[28px] border border-white/10 bg-black" aria-hidden="true">
+        <div className="absolute inset-0 bg-black" />
+        <span className="pointer-events-none absolute left-1/2 top-4 z-10 h-1.5 w-14 -translate-x-1/2 rounded-full bg-white/15 blur-[0.5px]" />
+        <span className="pointer-events-none absolute left-1/2 top-6 z-10 h-3 w-3 -translate-x-1/2 rounded-full bg-[#0a0f27] shadow-[inset_0_0_4px_rgba(255,255,255,0.12)]" />
       </div>
     </motion.div>
   );

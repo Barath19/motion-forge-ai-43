@@ -1,6 +1,7 @@
+import { BlurIn } from '@/components/BlurIn';
 import GradientBackdrop from '@/components/GradientBackdrop';
+import { StaggeredFade } from '@/components/StaggeredFade';
 import { ContainerScroll } from '@/components/ui/container-scroll-animation';
-import Button from '@/components/Button';
 
 const Hero = () => {
   return (
@@ -10,61 +11,24 @@ const Hero = () => {
       <ContainerScroll
         titleComponent={
           <>
-            <h1 className="text-4xl font-semibold leading-tight">
-              Meet
-              <br />
-              <span className="text-5xl md:text-[7rem] font-bold mt-1 leading-none tracking-tight">
+            <h1 className="text-5xl font-semibold leading-tight md:text-6xl">
+              <StaggeredFade
+                as="span"
+                direction="up"
+                text="Meet"
+                className="block pb-2"
+              />
+              <BlurIn
+                as="span"
+                className="block text-[3.8rem] font-bold mt-1 leading-none tracking-tight text-white md:text-[8rem]"
+              >
                 FrameLab
-              </span>
+              </BlurIn>
             </h1>
           </>
         }
-      >
-        <div className="flex h-full w-full flex-col items-center justify-between rounded-2xl border border-white/10 bg-black/50 p-6 text-white backdrop-blur-md md:p-10">
-          <div className="flex w-full flex-col items-center space-y-5 text-center">
-            <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-medium uppercase tracking-[0.2em] text-white/70 backdrop-blur">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(74,222,128,0.8)]" />
-              Real-time preview
-            </span>
-            <div className="space-y-4">
-              <h2 className="text-2xl font-semibold leading-tight text-white/90 md:text-3xl">
-                Generative motion graphics, tuned to your brand in seconds.
-              </h2>
-              <p className="max-w-2xl text-base text-white/70 md:text-lg">
-                Combine ML-powered animation, smart camera moves, and studio-grade light effects to launch campaigns that convert.
-              </p>
-            </div>
-          </div>
-          <div className="flex w-full flex-col items-center space-y-6 text-center">
-            <div className="flex flex-wrap items-center justify-center gap-3 md:gap-4">
-              <Button size="lg" className="shadow-lg shadow-fuchsia-500/25">
-                Start generating
-              </Button>
-              <button
-                type="button"
-                className="inline-flex items-center gap-2 rounded-lg border border-white/30 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/50 hover:bg-white/10"
-              >
-                <span className="h-2 w-2 animate-ping rounded-full bg-white/80" />
-                Watch a 40s demo
-              </button>
-            </div>
-            <dl className="grid gap-4 text-xs font-medium text-white/60 md:grid-cols-3 md:text-sm">
-              <div className="space-y-1">
-                <dt className="text-white/40">Creative teams shipped</dt>
-                <dd className="text-white/90">2.3k+</dd>
-              </div>
-              <div className="space-y-1">
-                <dt className="text-white/40">Average turnaround</dt>
-                <dd className="text-white/90">11 minutes</dd>
-              </div>
-              <div className="space-y-1">
-                <dt className="text-white/40">Brand palettes supported</dt>
-                <dd className="text-white/90">64 gradients</dd>
-              </div>
-            </dl>
-          </div>
-        </div>
-      </ContainerScroll>
+      />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[420px] bg-gradient-to-b from-transparent via-black/30 via-45% via-black/55 via-75% via-black/75 to-black" />
     </section>
   );
 };
