@@ -1,5 +1,6 @@
 import { BlurIn } from '@/components/BlurIn';
 import GradientBackdrop from '@/components/GradientBackdrop';
+import HeroScreenMarquee from '@/components/HeroScreenMarquee';
 import HeroScrollCards from '@/components/HeroScrollCards';
 import { StaggeredFade } from '@/components/StaggeredFade';
 import { ContainerScroll } from '@/components/ui/container-scroll-animation';
@@ -38,7 +39,10 @@ const Hero = () => {
             </>
           }
         >
-          <HeroScrollCards />
+          <div className="flex h-full w-full flex-col">
+            <HeroScreenMarquee />
+            <HeroScrollCards />
+          </div>
         </ContainerScroll>
       </div>
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[460px] bg-gradient-to-b from-transparent via-black/30 via-45% via-black/55 via-75% via-black/75 to-black" />
