@@ -136,7 +136,7 @@ const HeroScrollCards = () => {
   const renderCards = [...cards, ...cards];
 
   return (
-    <div className="relative flex w-full items-center justify-center overflow-hidden px-2 pb-2 mt-2">
+    <div className="relative flex w-full items-center justify-center overflow-hidden px-2">
       <div ref={listRef} className="relative flex w-max gap-4 px-2">
         {renderCards.map((card, index) => (
           <div

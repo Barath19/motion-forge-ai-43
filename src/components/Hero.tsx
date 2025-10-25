@@ -39,7 +39,7 @@ const Hero = () => {
             </>
           }
         >
-          <div className="flex h-full w-full flex-col">
+          <div className="flex h-full w-full flex-col gap-0">
             <HeroScreenMarquee />
             <HeroScrollCards />
           </div>
