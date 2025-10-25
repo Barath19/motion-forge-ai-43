@@ -42,7 +42,7 @@ const HeroScreenMarquee = () => {
     <div className="flex h-full w-full items-center justify-center overflow-hidden bg-black">
       <div
         ref={textRef}
-        className="whitespace-nowrap text-2xl font-semibold uppercase tracking-[0.6em] text-white/80 md:text-3xl"
+        className="whitespace-nowrap font-marquee text-2xl font-semibold uppercase tracking-[0.1em] text-white/80 md:text-3xl"
       >
         {marqueeCopy}
       </div>
