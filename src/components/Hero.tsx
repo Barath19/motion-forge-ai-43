@@ -4,7 +4,7 @@ import Button from '@/components/Button';
 
 const Hero = () => {
   return (
-    <section className="relative flex flex-col overflow-hidden pb-[320px] pt-[160px] md:pb-[500px] md:pt-[200px]">
+    <section className="relative flex flex-col overflow-hidden min-h-[180vh] pb-[520px] pt-[120px] md:min-h-[220vh] md:pb-[820px] md:pt-[180px]">
       <div className="absolute inset-0 -z-10">
         <div className="relative h-full w-full">
           <PrismaticBurst
@@ -33,16 +33,12 @@ const Hero = () => {
               <span className="text-5xl md:text-[7rem] font-bold mt-1 leading-none tracking-tight">
                 FrameLab
               </span>
-              <br />
-              <span className="text-2xl md:text-4xl font-normal text-muted-foreground mt-4 inline-block">
-                Unreal motion graphics, generated in minutes with AI.
-              </span>
             </h1>
           </>
         }
       >
-        <div className="flex h-full w-full flex-col justify-between rounded-2xl border border-white/10 bg-black/50 p-6 text-white backdrop-blur-md md:p-10">
-          <div className="space-y-5">
+        <div className="flex h-full w-full flex-col items-center justify-between rounded-2xl border border-white/10 bg-black/50 p-6 text-white backdrop-blur-md md:p-10">
+          <div className="flex w-full flex-col items-center space-y-5 text-center">
             <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-medium uppercase tracking-[0.2em] text-white/70 backdrop-blur">
               <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(74,222,128,0.8)]" />
               Real-time preview
@@ -51,13 +47,13 @@ const Hero = () => {
               <h2 className="text-2xl font-semibold leading-tight text-white/90 md:text-3xl">
                 Generative motion graphics, tuned to your brand in seconds.
               </h2>
-              <p className="max-w-md text-base text-white/70 md:text-lg">
+              <p className="max-w-2xl text-base text-white/70 md:text-lg">
                 Combine ML-powered animation, smart camera moves, and studio-grade light effects to launch campaigns that convert.
               </p>
             </div>
           </div>
-          <div className="space-y-6">
-            <div className="flex flex-wrap items-center gap-3 md:gap-4">
+          <div className="flex w-full flex-col items-center space-y-6 text-center">
+            <div className="flex flex-wrap items-center justify-center gap-3 md:gap-4">
               <Button size="lg" className="shadow-lg shadow-fuchsia-500/25">
                 Start generating
               </Button>
