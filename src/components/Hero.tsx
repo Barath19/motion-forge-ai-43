@@ -1,28 +1,11 @@
+import GradientBackdrop from '@/components/GradientBackdrop';
 import { ContainerScroll } from '@/components/ui/container-scroll-animation';
-import PrismaticBurst from '@/components/PrismaticBurst';
 import Button from '@/components/Button';
 
 const Hero = () => {
   return (
     <section className="relative flex flex-col overflow-hidden min-h-[180vh] pb-[520px] pt-[120px] md:min-h-[220vh] md:pb-[820px] md:pt-[180px]">
-      <div className="absolute inset-0 -z-10">
-        <div className="relative h-full w-full">
-          <PrismaticBurst
-            animationType="rotate3d"
-            intensity={2.8}
-            speed={0.6}
-            distort={1.1}
-            paused={false}
-            offset={{ x: 0, y: 0 }}
-            hoverDampness={0.35}
-            rayCount={36}
-            mixBlendMode="screen"
-            colors={['#ff007a', '#6d4dff', '#33d9ff', '#ffffff']}
-          />
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,#ffffff20,transparent_55%)]" />
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-black/80 via-black/50 to-black/10" />
-        </div>
-      </div>
+      <GradientBackdrop variant="hero" />
 
       <ContainerScroll
         titleComponent={
