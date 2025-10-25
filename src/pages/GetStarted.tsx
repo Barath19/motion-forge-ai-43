@@ -104,7 +104,7 @@ const GetStarted = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="mb-12 text-center"
+            className="mb-12"
           >
             <h1 className="mb-4 text-5xl font-bold">Studio</h1>
             <p className="text-xl text-white/80">Upload and manage your images</p>
@@ -113,48 +113,39 @@ const GetStarted = () => {
             )}
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="mb-8"
-          >
-            <div
-              onDragEnter={handleDragEnter}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              onClick={handleUploadClick}
-              className={`cursor-pointer rounded-2xl border-2 border-dashed transition-all duration-300 ${
-                isDragging
-                  ? 'border-primary bg-primary/10 scale-[1.02]'
-                  : 'border-white/20 bg-white/5 hover:border-primary/50 hover:bg-white/10'
-              } p-12 text-center`}
-            >
-              <Upload className="mx-auto mb-4 h-16 w-16 text-white/60" />
-              <p className="mb-2 text-xl font-medium">
-                {isDragging ? 'Drop your images here' : 'Drag & drop images here'}
-              </p>
-              <p className="text-sm text-white/60">or click to browse</p>
-              <p className="mt-4 text-xs text-white/40">Supports: JPG, PNG, GIF, WEBP</p>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleFileInput}
-                className="hidden"
-              />
-            </div>
-          </motion.div>
-
-          {images.length > 0 && (
+          <div className="grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8">
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.4 }}
-              className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="aspect-square"
             >
+              <div
+                onDragEnter={handleDragEnter}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                onClick={handleUploadClick}
+                className={`flex h-full w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition-all duration-300 ${
+                  isDragging
+                    ? 'border-primary bg-primary/10 scale-[1.02]'
+                    : 'border-white/20 bg-white/5 hover:border-primary/50 hover:bg-white/10'
+                }`}
+              >
+                <Upload className="mb-2 h-8 w-8 text-white/60" />
+                <p className="text-xs font-medium text-white/80">Upload</p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleFileInput}
+                  className="hidden"
+                />
+              </div>
+            </motion.div>
+
+            {images.length > 0 && (
               <AnimatePresence>
                 {images.map((image) => (
                   <motion.div
@@ -173,19 +164,19 @@ const GetStarted = () => {
                     <div className="absolute inset-0 bg-black/0 transition-all duration-300 group-hover:bg-black/40" />
                     <button
                       onClick={() => handleDelete(image.id)}
-                      className="absolute right-2 top-2 rounded-full bg-black/70 p-2 opacity-0 transition-all duration-300 hover:bg-red-500 group-hover:opacity-100"
+                      className="absolute right-1 top-1 rounded-full bg-black/70 p-1.5 opacity-0 transition-all duration-300 hover:bg-red-500 group-hover:opacity-100"
                       aria-label="Delete image"
                     >
-                      <X className="h-4 w-4 text-white" />
+                      <X className="h-3 w-3 text-white" />
                     </button>
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                      <p className="truncate text-xs text-white">{image.filename}</p>
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                      <p className="truncate text-[10px] text-white">{image.filename}</p>
                     </div>
                   </motion.div>
                 ))}
               </AnimatePresence>
-            </motion.div>
-          )}
+            )}
+          </div>
         </div>
       </main>
     </div>
