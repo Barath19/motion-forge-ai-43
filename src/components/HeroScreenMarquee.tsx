@@ -4,19 +4,12 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useEffect, useRef } from 'react';
 
-const marqueeCopy = 'Create campaigns that actually convert';
-
 const HeroScreenMarquee = () => {
   const textRef = useRef<HTMLDivElement | null>(null);
-  const originalTextRef = useRef<string>(marqueeCopy);
 
   useEffect(() => {
     const textEl = textRef.current;
     if (!textEl) return;
-
-    const original = marqueeCopy.trim();
-    originalTextRef.current = original;
-    textEl.textContent = `${original} ${original}`;
 
     gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
@@ -34,9 +27,14 @@ const HeroScreenMarquee = () => {
 
     return () => {
       ctx.revert();
-      textEl.textContent = original;
     };
   }, []);
+
+  const renderText = () => (
+    <>
+      Create <span className="bg-primary px-2 text-primary-foreground">campaigns</span> that actually <span className="bg-primary px-2 text-primary-foreground">convert</span>
+    </>
+  );
 
   return (
     <div className="flex h-full w-full items-center justify-center overflow-hidden bg-black">
@@ -44,7 +42,7 @@ const HeroScreenMarquee = () => {
         ref={textRef}
         className="whitespace-nowrap font-marquee text-2xl font-semibold uppercase tracking-[0.1em] text-white/80 md:text-3xl"
       >
-        {marqueeCopy}
+        {renderText()} &nbsp;&nbsp; {renderText()}
       </div>
     </div>
   );
