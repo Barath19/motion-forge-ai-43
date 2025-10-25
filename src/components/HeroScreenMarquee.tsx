@@ -14,7 +14,7 @@ const HeroScreenMarquee = () => {
     gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
       gsap.to(textEl, {
-        xPercent: -50,
+        xPercent: 50,
         ease: 'none',
         scrollTrigger: {
           trigger: textEl,
