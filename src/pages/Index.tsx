@@ -59,7 +59,7 @@ const Index = () => {
         <Hero />
         <section className="relative min-h-screen overflow-hidden bg-black text-white">
           <GradientBackdrop variant="section" />
-          <div className="relative z-10 mx-auto flex min-h-screen max-w-5xl flex-col items-center justify-center gap-8 px-6 text-center md:gap-12">
+          <div className="relative z-10 mx-auto flex min-h-screen max-w-5xl flex-col items-center justify-start pt-32 gap-8 px-6 text-center md:gap-12">
             <Button variant="primary" size="lg">
               Get Started
             </Button>
