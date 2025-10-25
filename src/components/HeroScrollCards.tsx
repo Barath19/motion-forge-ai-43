@@ -136,16 +136,12 @@ const HeroScrollCards = () => {
   const renderCards = [...cards, ...cards];
 
   return (
-    <div className="relative mx-auto mt-24 md:mt-32 flex w-[96vw] max-w-[120rem] items-center justify-center overflow-hidden rounded-[48px] border border-white/10 bg-white/[0.04] px-12 py-12 shadow-[0_30px_80px_rgba(10,10,16,0.45)] backdrop-blur">
-      <div className="pointer-events-none absolute inset-0 rounded-[42px] border border-white/10 opacity-50" />
-      <div className="pointer-events-none absolute inset-[12px] rounded-[36px] border border-white/5 opacity-30" />
-      <div className="pointer-events-none absolute inset-[16px] rounded-[32px] bg-gradient-to-br from-white/[0.08] via-transparent to-transparent opacity-60" />
-
-      <div ref={listRef} className="relative flex w-max gap-6 px-4">
+    <div className="relative flex w-full items-center justify-center overflow-hidden px-4 py-6">
+      <div ref={listRef} className="relative flex w-max gap-4 px-2">
         {renderCards.map((card, index) => (
           <div
             key={`${card.id}-${index}`}
-            className="h-[360px] md:h-[420px] w-auto overflow-hidden rounded-2xl"
+            className="h-[200px] md:h-[280px] w-auto overflow-hidden rounded-xl"
             style={{ aspectRatio: '9 / 16' }}
           >
             {card.type === 'video' && card.videoSrc && (
