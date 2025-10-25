@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,500;1,600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -46,6 +48,7 @@ All colors MUST be HSL.
     /* Gradient stops */
     --gradient-blue: 220 100% 61%;
     --gradient-lime: 75 100% 71%;
+    --font-meet: 'Playfair Display', serif;
   }
 }
 
@@ -170,4 +173,9 @@ All colors MUST be HSL.
     animation: auroraFloatC 26s ease-in-out infinite alternate;
     will-change: transform, opacity;
   }
+
+  .font-meet {
+    font-family: var(--font-meet);
+  }
+
 }

@@ -9,29 +9,32 @@ const Hero = () => {
   return (
     <section className="relative flex flex-col overflow-hidden min-h-[170vh] pb-[420px] pt-[48px] md:min-h-[210vh] md:pb-[680px] md:pt-[110px]">
       <GradientBackdrop variant="hero" />
+      <div className="pointer-events-none absolute left-1/2 top-48 z-10 h-[26rem] w-[48rem] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(156,126,255,0.35)0%,rgba(60,30,120,0.12)50%,transparent 85%)] blur-3xl md:top-56 md:h-[32rem] md:w-[60rem]" />
 
-      <ContainerScroll
-        titleComponent={
-          <>
-            <h1 className="text-5xl font-semibold leading-tight md:text-6xl">
+      <div className="relative z-20">
+        <ContainerScroll
+          titleComponent={
+            <>
+              <h1 className="text-5xl font-semibold leading-tight md:text-6xl">
               <StaggeredFade
                 as="span"
                 direction="up"
                 text="Meet"
-                className="block pb-2"
+                className="pb-2 font-meet italic text-4xl tracking-[0.18em] text-white/90 md:text-5xl md:tracking-[0.22em]"
               />
-              <BlurIn
-                as="span"
-                className="block text-[3.8rem] font-bold mt-1 leading-none tracking-tight text-white md:text-[8rem]"
-              >
-                FrameLab
-              </BlurIn>
-            </h1>
-          </>
-        }
-      >
-        <HeroScreenMarquee />
-      </ContainerScroll>
+                <BlurIn
+                  as="span"
+                  className="block text-[3.8rem] font-bold mt-1 leading-none tracking-tight text-white md:text-[8rem]"
+                >
+                  FrameLab
+                </BlurIn>
+              </h1>
+            </>
+          }
+        >
+          <HeroScreenMarquee />
+        </ContainerScroll>
+      </div>
       <div className="relative z-20">
         <HeroScrollCards />
       </div>

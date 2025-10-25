@@ -74,6 +74,11 @@ export const ContainerScroll = ({
     [0, 0.6, 1],
     [0, centerTranslate * 0.6, centerTranslate]
   );
+  const glowOpacity = useTransform(
+    scrollYProgress,
+    [0, 0.45, 0.7, 1],
+    [1, 0.7, 0.3, 0]
+  );
 
   return (
     <div
@@ -87,7 +92,12 @@ export const ContainerScroll = ({
         }}
       >
         <Header translate={headlineTranslate} titleComponent={titleComponent} />
-        <Card rotate={rotate} translate={cardTranslate} scale={cardScale}>
+        <Card
+          rotate={rotate}
+          translate={cardTranslate}
+          scale={cardScale}
+          glowOpacity={glowOpacity}
+        >
           {children}
         </Card>
       </div>
@@ -112,10 +122,11 @@ type CardProps = {
   rotate: MotionValue<number>;
   scale: MotionValue<number>;
   translate: MotionValue<number>;
+  glowOpacity: MotionValue<number>;
   children?: React.ReactNode;
 };
 
-export const Card = ({ rotate, scale, translate, children }: CardProps) => {
+export const Card = ({ rotate, scale, translate, glowOpacity, children }: CardProps) => {
   return (
     <motion.div
       style={{
@@ -130,6 +141,10 @@ export const Card = ({ rotate, scale, translate, children }: CardProps) => {
       <div className="pointer-events-none absolute inset-0 rounded-[40px] border border-white/10 opacity-60" />
       <div className="pointer-events-none absolute inset-[6px] rounded-[34px] border border-white/5 opacity-40" />
       <div className="pointer-events-none absolute inset-[10px] rounded-[30px] bg-gradient-to-br from-white/[0.08] via-transparent to-transparent opacity-70" />
+      <motion.div
+        style={{ opacity: glowOpacity }}
+        className="pointer-events-none absolute left-1/2 -top-16 z-0 h-40 w-[85%] max-w-[52rem] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(160,130,255,0.5)_0%,rgba(70,40,140,0.18)_55%,rgba(0,0,0,0)_90%)] blur-[72px] md:-top-20 md:h-48"
+      />
 
       <div className="relative z-10 h-full w-full overflow-hidden rounded-[28px] border border-white/10 bg-black">
         <div className="absolute inset-0 bg-black" />
