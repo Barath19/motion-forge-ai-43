@@ -26,8 +26,9 @@ export const BlurIn = <T extends keyof JSX.IntrinsicElements = 'h2'>({
       initial={{ filter: 'blur(20px)', opacity: 0 }}
       animate={isInView ? { filter: 'blur(0px)', opacity: 1 } : {}}
       transition={{ duration: 1.2 }}
+      style={{ willChange: 'filter, opacity' }}
       className={clsx(
-        'text-xl text-center sm:text-4xl font-bold tracking-tighter md:text-6xl md:leading-[4rem]',
+        'text-xl text-center sm:text-4xl font-bold tracking-tighter md:text-6xl md:leading-[4rem] transform-gpu',
         className
       )}
     >
