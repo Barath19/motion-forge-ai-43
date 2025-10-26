@@ -66,6 +66,7 @@ const GetStarted = () => {
   const [isConvertingTTS, setIsConvertingTTS] = useState(false);
   const [ttsAudioUrl, setTtsAudioUrl] = useState<string | null>(null);
   const [isPlayingRecordAudio, setIsPlayingRecordAudio] = useState(false);
+  const [showRecordAudio, setShowRecordAudio] = useState(false);
   const recordAudioRef = useRef<HTMLAudioElement | null>(null);
   const [isEditingImage, setIsEditingImage] = useState(false);
   const [editPrompt, setEditPrompt] = useState('');
@@ -318,34 +319,11 @@ const GetStarted = () => {
   };
 
   const handleStopRecording = async () => {
-    // If audio is playing, stop it
-    if (isPlayingRecordAudio && recordAudioRef.current) {
-      recordAudioRef.current.pause();
-      recordAudioRef.current.currentTime = 0;
-      setIsPlayingRecordAudio(false);
-      toast.success('Playback stopped');
-      return;
-    }
-    
-    // Otherwise, stop recording and play the audio
     stopRecording();
     toast.success('Recording stopped');
     
-    // Play the uploaded audio file after stopping recording
-    if (!recordAudioRef.current) {
-      recordAudioRef.current = new Audio(recordAudio);
-      recordAudioRef.current.onended = () => {
-        setIsPlayingRecordAudio(false);
-      };
-    }
-    
-    try {
-      setIsPlayingRecordAudio(true);
-      await recordAudioRef.current.play();
-    } catch (error) {
-      setIsPlayingRecordAudio(false);
-      console.error('Failed to play audio:', error);
-    }
+    // Show the audio player
+    setShowRecordAudio(true);
   };
 
   const handleConvertToSpeech = async () => {
@@ -660,6 +638,19 @@ const GetStarted = () => {
                         variant="ghost"
                         size="sm"
                         onClick={clearRecording}
+                        className="h-8 px-2"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
+                  {showRecordAudio && (
+                    <div className="flex items-center gap-2 p-2 rounded bg-card border border-border">
+                      <audio src={recordAudio} controls className="flex-1 h-8" />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowRecordAudio(false)}
                         className="h-8 px-2"
                       >
                         <X className="h-3 w-3" />
