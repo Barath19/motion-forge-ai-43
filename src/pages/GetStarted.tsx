@@ -54,6 +54,7 @@ const GetStarted = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [prompt, setPrompt] = useState('');
   const [duration, setDuration] = useState('8s');
+  const [resolution, setResolution] = useState('1280x720');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationStatus, setGenerationStatus] = useState<string>('');
   const [generatedVideo, setGeneratedVideo] = useState<GeneratedVideo | null>(null);
@@ -691,23 +692,52 @@ const GetStarted = () => {
                   />
                 </div>
 
-                {/* Duration */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">Duration</label>
-                  <p className="text-xs text-muted-foreground">Duration in seconds</p>
-                  <div className="flex gap-2">
-                    {(selectedModel === 'wan' ? wanDurations : soraDurations).map((d) => (
+                {/* Duration & Resolution */}
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Duration */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Duration</label>
+                    <p className="text-xs text-muted-foreground">Duration in seconds</p>
+                    <div className="flex gap-2">
+                      {(selectedModel === 'wan' ? wanDurations : soraDurations).map((d) => (
+                        <Button
+                          key={d}
+                          variant={duration === d ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setDuration(d)}
+                          disabled={isGenerating}
+                          className={cn("flex-1", duration === d && "shadow-lg ring-1 ring-primary/20")}
+                        >
+                          {d}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Resolution */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Resolution</label>
+                    <p className="text-xs text-muted-foreground">Video dimensions</p>
+                    <div className="flex gap-2">
                       <Button
-                        key={d}
-                        variant={duration === d ? "default" : "outline"}
+                        variant={resolution === '1280x720' ? "default" : "outline"}
                         size="sm"
-                        onClick={() => setDuration(d)}
+                        onClick={() => setResolution('1280x720')}
                         disabled={isGenerating}
-                        className={cn("min-w-[60px]", duration === d && "shadow-lg ring-1 ring-primary/20")}
+                        className={cn("flex-1", resolution === '1280x720' && "shadow-lg ring-1 ring-primary/20")}
                       >
-                        {d}
+                        1280x720
                       </Button>
-                    ))}
+                      <Button
+                        variant={resolution === '720x1280' ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setResolution('720x1280')}
+                        disabled={isGenerating}
+                        className={cn("flex-1", resolution === '720x1280' && "shadow-lg ring-1 ring-primary/20")}
+                      >
+                        720x1280
+                      </Button>
+                    </div>
                   </div>
                 </div>
 
