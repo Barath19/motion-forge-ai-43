@@ -29,8 +29,11 @@ serve(async (req) => {
       );
     }
 
+    // Strip 's' suffix from duration (e.g., '4s' -> '4')
+    const durationValue = duration.replace(/s$/i, '');
+
     console.log('Creating video with prompt:', prompt);
-    console.log('Duration:', duration);
+    console.log('Duration:', durationValue);
     console.log('Resolution:', resolution);
     console.log('Image file:', imageFile ? `${imageFile.name} (${imageFile.size} bytes)` : 'none');
 
@@ -38,7 +41,7 @@ serve(async (req) => {
     const openaiFormData = new FormData();
     openaiFormData.append('model', 'sora-2');
     openaiFormData.append('prompt', prompt);
-    openaiFormData.append('seconds', duration);
+    openaiFormData.append('seconds', durationValue);
     openaiFormData.append('size', resolution);
     
     if (imageFile) {
