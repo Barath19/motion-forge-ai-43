@@ -37,7 +37,6 @@ serve(async (req) => {
     });
 
     console.log('MCP response status:', response.status);
-    console.log('MCP response headers:', Object.fromEntries(response.headers.entries()));
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -45,10 +44,33 @@ serve(async (req) => {
       throw new Error(`TTS request failed: ${response.statusText}`);
     }
 
-    const audioBlob = await response.blob();
-    console.log('Audio blob size:', audioBlob.size, 'type:', audioBlob.type);
+    // Parse the JSON response which contains the audio data
+    const jsonResponse = await response.json();
+    console.log('MCP response keys:', Object.keys(jsonResponse));
     
-    return new Response(audioBlob, {
+    // The audio is likely base64 encoded in the response
+    let audioData;
+    if (jsonResponse.audio) {
+      audioData = jsonResponse.audio;
+    } else if (jsonResponse.data) {
+      audioData = jsonResponse.data;
+    } else if (jsonResponse.content) {
+      audioData = jsonResponse.content;
+    } else {
+      console.log('Full response:', JSON.stringify(jsonResponse).substring(0, 500));
+      throw new Error('Audio data not found in response');
+    }
+
+    // Decode base64 to binary
+    const binaryString = atob(audioData);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    
+    console.log('Audio size:', bytes.length, 'bytes');
+    
+    return new Response(bytes, {
       headers: {
         ...corsHeaders,
         'Content-Type': 'audio/mpeg',
