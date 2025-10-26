@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion';
 import { useState, useRef } from 'react';
-import { Upload, X, Download, Loader2, Mic, Square, Play, Volume2 } from 'lucide-react';
+import { Upload, X, Download, Loader2, Mic, Square, Play, Volume2, LayoutGrid } from 'lucide-react';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -30,6 +31,7 @@ interface GeneratedVideo {
 const durations = ['4s', '8s', '12s'];
 
 const GetStarted = () => {
+  const navigate = useNavigate();
   const [uploadedImage, setUploadedImage] = useState<UploadedImage | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [prompt, setPrompt] = useState('');
@@ -216,10 +218,23 @@ const GetStarted = () => {
       <main className="relative">
         {/* Header */}
         <div className="border-b border-border/10 bg-[#0f0f0f] px-6 py-4">
-          <h1 className="text-lg font-medium text-foreground/90">OpenAI / SORA 2 Pro I2V</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            OpenAI's Sora 2 Pro is new state of the art video and audio generation model.
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-lg font-medium text-foreground/90">OpenAI / SORA 2 Pro I2V</h1>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                OpenAI's Sora 2 Pro is new state of the art video and audio generation model.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/storyboard')}
+              className="gap-2"
+            >
+              <LayoutGrid className="h-4 w-4" />
+              Storyboard
+            </Button>
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-2 min-h-[calc(100vh-88px)]">
