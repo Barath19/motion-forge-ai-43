@@ -373,12 +373,12 @@ const GetStarted = () => {
                   </div>
 
                   {/* Storyboard Toggle */}
-                  <div className="flex items-center justify-between space-y-2 rounded-lg border border-border/20 bg-background p-4">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="storyboard-mode" className="text-sm font-medium">
+                  <div className="flex items-center justify-between rounded-lg border border-border/20 bg-background p-4">
+                    <div className="flex-1">
+                      <Label htmlFor="storyboard-mode" className="text-sm font-medium text-foreground/90">
                         Storyboard Mode
                       </Label>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-muted-foreground mt-1">
                         Enable to organize scenes before generating video
                       </p>
                     </div>
