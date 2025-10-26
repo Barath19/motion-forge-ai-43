@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
-import { useState, useRef } from 'react';
-import { Upload, X, Download, Loader2, Mic, Square, Play, Volume2, LayoutGrid, ArrowLeft } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Upload, X, Download, Loader2, Mic, Square, Play, Volume2, LayoutGrid, ArrowLeft, History } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -34,6 +34,16 @@ interface GeneratedVideo {
   jobId: string;
 }
 
+interface VideoHistoryItem {
+  id: string;
+  video_url: string;
+  prompt: string;
+  image_url: string | null;
+  duration: string;
+  model: string;
+  created_at: string;
+}
+
 const soraDurations = ['4s', '8s', '12s'];
 const wanDurations = ['5s', '12s'];
 
@@ -59,6 +69,52 @@ const GetStarted = () => {
   const [isEditingAI, setIsEditingAI] = useState(false);
   const [originalImage, setOriginalImage] = useState<UploadedImage | null>(null);
   const [editedImagePreview, setEditedImagePreview] = useState<string | null>(null);
+  const [videoHistory, setVideoHistory] = useState<VideoHistoryItem[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+
+  // Fetch video history on component mount
+  useEffect(() => {
+    fetchVideoHistory();
+  }, []);
+
+  const fetchVideoHistory = async () => {
+    setIsLoadingHistory(true);
+    try {
+      const { data, error } = await supabase
+        .from('videos_history')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setVideoHistory(data || []);
+    } catch (error) {
+      console.error('Error fetching video history:', error);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
+
+  const saveVideoToHistory = async (videoUrl: string, imageUrl: string | null = null) => {
+    try {
+      const { error } = await supabase
+        .from('videos_history')
+        .insert({
+          video_url: videoUrl,
+          prompt: prompt,
+          image_url: imageUrl,
+          duration: duration,
+          model: selectedModel,
+        });
+
+      if (error) throw error;
+      
+      // Refresh history
+      await fetchVideoHistory();
+    } catch (error) {
+      console.error('Error saving video to history:', error);
+      toast.error('Failed to save video to history');
+    }
+  };
 
   const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault();
@@ -224,6 +280,9 @@ const GetStarted = () => {
           url: result.publicUrl,
           jobId: completedJob.id,
         });
+
+        // Save to history
+        await saveVideoToHistory(result.publicUrl, uploadedImage?.url || null);
 
         toast.success('Video generated successfully!');
         setGenerationStatus('Complete!');
@@ -675,6 +734,10 @@ const GetStarted = () => {
               <TabsList className="bg-card border border-border mb-4">
                 <TabsTrigger value="preview">Preview</TabsTrigger>
                 <TabsTrigger value="json">JSON</TabsTrigger>
+                <TabsTrigger value="history">
+                  <History className="h-4 w-4 mr-2" />
+                  History
+                </TabsTrigger>
               </TabsList>
               <TabsContent value="preview" className="mt-0">
                 <div className="rounded-lg border border-border bg-[#0f0f0f] overflow-hidden min-h-[500px] flex items-center justify-center">
@@ -728,6 +791,51 @@ const GetStarted = () => {
                   <pre className="text-xs text-muted-foreground">
                     {generatedVideo ? JSON.stringify(generatedVideo, null, 2) : '{}'}
                   </pre>
+                </div>
+              </TabsContent>
+              <TabsContent value="history" className="mt-0">
+                <div className="rounded-lg border border-border bg-[#0f0f0f] p-4 min-h-[500px]">
+                  {isLoadingHistory ? (
+                    <div className="flex items-center justify-center h-full">
+                      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : videoHistory.length === 0 ? (
+                    <div className="text-center py-12">
+                      <History className="mx-auto h-12 w-12 text-muted-foreground/20 mb-4" />
+                      <p className="text-sm text-muted-foreground">No videos in history yet</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {videoHistory.map((item) => (
+                        <div key={item.id} className="rounded-lg border border-border bg-card overflow-hidden">
+                          <video
+                            src={item.video_url}
+                            controls
+                            className="w-full aspect-video"
+                          />
+                          <div className="p-3 space-y-2">
+                            <p className="text-sm text-foreground line-clamp-2">{item.prompt}</p>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <span className="px-2 py-0.5 rounded bg-background">
+                                {item.model === 'sora' ? 'SORA 2' : 'Wan 2.5'}
+                              </span>
+                              <span>{item.duration}</span>
+                              <span>•</span>
+                              <span>{new Date(item.created_at).toLocaleDateString()}</span>
+                            </div>
+                            <a
+                              href={item.video_url}
+                              download
+                              className="inline-flex items-center gap-2 text-xs text-primary hover:text-primary/80 transition-colors"
+                            >
+                              <Download className="h-3 w-3" />
+                              Download
+                            </a>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </TabsContent>
             </Tabs>
