@@ -315,249 +315,219 @@ const GetStarted = () => {
             <div className="max-w-2xl">
               <h2 className="text-sm font-medium text-muted-foreground mb-4">Input</h2>
               
-              <Tabs defaultValue="playground" className="mb-6">
-                <TabsList className="bg-background/50">
-                  <TabsTrigger value="playground">API Playground</TabsTrigger>
-                  <TabsTrigger value="logs">Session logs</TabsTrigger>
-                </TabsList>
-                <TabsContent value="playground" className="space-y-6 mt-6">
-                  {/* Prompt */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <label className="text-sm font-medium text-foreground/90">Prompt</label>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={isRecording ? handleStopRecording : handleStartRecording}
-                          disabled={isGenerating}
-                          className="h-8"
-                        >
-                          {isRecording ? (
-                            <>
-                              <Square className="h-3 w-3 mr-1 fill-current" />
-                              Stop
-                            </>
-                          ) : (
-                            <>
-                              <Mic className="h-3 w-3 mr-1" />
-                              Record
-                            </>
-                          )}
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={handleConvertToSpeech}
-                          disabled={isGenerating || isConvertingTTS || !prompt.trim()}
-                          className="h-8"
-                        >
-                          {isConvertingTTS ? (
-                            <>
-                              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                              Converting...
-                            </>
-                          ) : (
-                            <>
-                              <Volume2 className="h-3 w-3 mr-1" />
-                              TTS
-                            </>
-                          )}
-                        </Button>
+              <div className="space-y-6">
+                {/* Image Upload */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground/90">Image</label>
+                  <p className="text-xs text-muted-foreground">
+                    Drag and drop file(s) or provide a base64 encoded data URL
+                  </p>
+                  
+                  {uploadedImage ? (
+                    <div className="relative flex items-center gap-3 rounded-lg border border-border/20 bg-background p-3">
+                      <img
+                        src={uploadedImage.url}
+                        alt={uploadedImage.filename}
+                        className="h-12 w-12 rounded object-cover"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-foreground/80 truncate">{uploadedImage.filename}</p>
                       </div>
-                    </div>
-                    <Textarea
-                      placeholder="Describe your video scene..."
-                      value={prompt}
-                      onChange={(e) => setPrompt(e.target.value)}
-                      maxLength={500}
-                      className="min-h-[140px] resize-none bg-background border-border/20 text-foreground"
-                      disabled={isGenerating}
-                    />
-                    {audioBlob && (
-                      <div className="flex items-center gap-2 p-2 rounded bg-background/50 border border-border/20">
-                        <audio src={URL.createObjectURL(audioBlob)} controls className="flex-1 h-8" />
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={clearRecording}
-                          className="h-8 px-2"
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    )}
-                    {ttsAudioUrl && (
-                      <div className="flex items-center gap-2 p-2 rounded bg-background/50 border border-border/20">
-                        <audio ref={audioRef} src={ttsAudioUrl} className="hidden" />
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={handlePlayTTS}
-                          className="h-8"
-                        >
-                          <Play className="h-3 w-3 mr-1" />
-                          Play TTS
-                        </Button>
-                        <audio src={ttsAudioUrl} controls className="flex-1 h-8" />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Duration */}
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground/90">Duration</label>
-                    <p className="text-xs text-muted-foreground">Duration in seconds</p>
-                    <div className="flex gap-2">
-                      {(selectedModel === 'wan' ? wanDurations : soraDurations).map((d) => (
-                        <Button
-                          key={d}
-                          variant={duration === d ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setDuration(d)}
-                          disabled={isGenerating}
-                          className="min-w-[60px]"
-                        >
-                          {d}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Storyboard Toggle */}
-                  <div className="flex items-center justify-between rounded-lg border border-border/20 bg-background p-4">
-                    <div className="flex-1">
-                      <Label htmlFor="storyboard-mode" className="text-sm font-medium text-foreground/90">
-                        Storyboard Mode
-                      </Label>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Enable to organize scenes before generating video
-                      </p>
-                    </div>
-                    <Switch
-                      id="storyboard-mode"
-                      checked={storyboardMode}
-                      onCheckedChange={setStoryboardMode}
-                      disabled={isGenerating}
-                    />
-                  </div>
-
-                  {/* Image Upload */}
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground/90">Image</label>
-                    <p className="text-xs text-muted-foreground">
-                      Drag and drop file(s) or provide a base64 encoded data URL
-                    </p>
-                    
-                    {uploadedImage ? (
-                      <div className="relative flex items-center gap-3 rounded-lg border border-border/20 bg-background p-3">
-                        <img
-                          src={uploadedImage.url}
-                          alt={uploadedImage.filename}
-                          className="h-12 w-12 rounded object-cover"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-foreground/80 truncate">{uploadedImage.filename}</p>
-                        </div>
-                        <button
-                          onClick={handleRemoveImage}
-                          className="rounded p-1 hover:bg-destructive/10 transition-colors"
-                          disabled={isGenerating}
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      </div>
-                    ) : (
-                      <div
-                        onDragEnter={handleDragEnter}
-                        onDragOver={handleDragOver}
-                        onDragLeave={handleDragLeave}
-                        onDrop={handleDrop}
-                        onClick={handleUploadClick}
-                        className={`relative rounded-lg border-2 border-dashed transition-all cursor-pointer ${
-                          isDragging
-                            ? 'border-primary bg-primary/5'
-                            : 'border-border/30 bg-background hover:border-border/50'
-                        }`}
+                      <button
+                        onClick={handleRemoveImage}
+                        className="rounded p-1 hover:bg-destructive/10 transition-colors"
+                        disabled={isGenerating}
                       >
-                        <div className="flex items-center justify-center p-8">
-                          <div className="text-center">
-                            <Upload className="mx-auto h-8 w-8 text-muted-foreground/40 mb-2" />
-                            <p className="text-sm text-muted-foreground">
-                              Enter URL or base64 data
-                            </p>
-                          </div>
-                        </div>
-                        <input
-                          ref={fileInputRef}
-                          type="file"
-                          accept="image/jpeg,image/jpg,image/png,image/webp"
-                          onChange={handleFileInput}
-                          className="hidden"
-                        />
-                      </div>
-                    )}
-                    <p className="text-xs text-muted-foreground">
-                      jpeg, jpg, png up to 15 MB (single file)
-                    </p>
-                  </div>
-
-                  {/* Additional Settings */}
-                  <details className="group">
-                    <summary className="cursor-pointer text-sm font-medium text-foreground/90 flex items-center justify-between py-2 hover:text-foreground transition-colors">
-                      Additional settings
-                      <svg className="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </summary>
-                    <div className="mt-3 text-sm text-muted-foreground">
-                      Advanced options coming soon...
+                        <X className="h-4 w-4" />
+                      </button>
                     </div>
-                  </details>
+                  ) : (
+                    <div
+                      onDragEnter={handleDragEnter}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                      onClick={handleUploadClick}
+                      className={`relative rounded-lg border-2 border-dashed transition-all cursor-pointer ${
+                        isDragging
+                          ? 'border-primary bg-primary/5'
+                          : 'border-border/30 bg-background hover:border-border/50'
+                      }`}
+                    >
+                      <div className="flex items-center justify-center p-8">
+                        <div className="text-center">
+                          <Upload className="mx-auto h-8 w-8 text-muted-foreground/40 mb-2" />
+                          <p className="text-sm text-muted-foreground">
+                            Enter URL or base64 data
+                          </p>
+                        </div>
+                      </div>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/jpeg,image/jpg,image/png,image/webp"
+                        onChange={handleFileInput}
+                        className="hidden"
+                      />
+                    </div>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    jpeg, jpg, png up to 15 MB (single file)
+                  </p>
+                </div>
 
-                  {/* Cost Info */}
-                  <div className="rounded-lg border border-border/20 bg-background/50 px-4 py-3">
-                    <p className="text-sm text-green-500/80 flex items-center gap-2">
-                      <span className="text-lg">$</span>
-                      A video generation will cost $1.20
+                {/* Prompt */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium text-foreground/90">Prompt</label>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={isRecording ? handleStopRecording : handleStartRecording}
+                        disabled={isGenerating}
+                        className="h-8"
+                      >
+                        {isRecording ? (
+                          <>
+                            <Square className="h-3 w-3 mr-1 fill-current" />
+                            Stop
+                          </>
+                        ) : (
+                          <>
+                            <Mic className="h-3 w-3 mr-1" />
+                            Record
+                          </>
+                        )}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleConvertToSpeech}
+                        disabled={isGenerating || isConvertingTTS || !prompt.trim()}
+                        className="h-8"
+                      >
+                        {isConvertingTTS ? (
+                          <>
+                            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                            Converting...
+                          </>
+                        ) : (
+                          <>
+                            <Volume2 className="h-3 w-3 mr-1" />
+                            TTS
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                  <Textarea
+                    placeholder="Describe your video scene..."
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    maxLength={500}
+                    className="min-h-[140px] resize-none bg-background border-border/20 text-foreground"
+                    disabled={isGenerating}
+                  />
+                  {audioBlob && (
+                    <div className="flex items-center gap-2 p-2 rounded bg-background/50 border border-border/20">
+                      <audio src={URL.createObjectURL(audioBlob)} controls className="flex-1 h-8" />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={clearRecording}
+                        className="h-8 px-2"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
+                  {ttsAudioUrl && (
+                    <div className="flex items-center gap-2 p-2 rounded bg-background/50 border border-border/20">
+                      <audio ref={audioRef} src={ttsAudioUrl} className="hidden" />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handlePlayTTS}
+                        className="h-8"
+                      >
+                        <Play className="h-3 w-3 mr-1" />
+                        Play TTS
+                      </Button>
+                      <audio src={ttsAudioUrl} controls className="flex-1 h-8" />
+                    </div>
+                  )}
+                </div>
+
+                {/* Duration */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground/90">Duration</label>
+                  <p className="text-xs text-muted-foreground">Duration in seconds</p>
+                  <div className="flex gap-2">
+                    {(selectedModel === 'wan' ? wanDurations : soraDurations).map((d) => (
+                      <Button
+                        key={d}
+                        variant={duration === d ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setDuration(d)}
+                        disabled={isGenerating}
+                        className="min-w-[60px]"
+                      >
+                        {d}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Storyboard Toggle */}
+                <div className="flex items-center justify-between rounded-lg border border-border/20 bg-background p-4">
+                  <div className="flex-1">
+                    <Label htmlFor="storyboard-mode" className="text-sm font-medium text-foreground/90">
+                      Storyboard Mode
+                    </Label>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Enable to organize scenes before generating video
                     </p>
                   </div>
+                  <Switch
+                    id="storyboard-mode"
+                    checked={storyboardMode}
+                    onCheckedChange={setStoryboardMode}
+                    disabled={isGenerating}
+                  />
+                </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex gap-3 pt-4">
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setPrompt('');
-                        setDuration('8s');
-                        setUploadedImage(null);
-                        setGeneratedVideo(null);
-                        setGenerationStatus('');
-                      }}
-                      disabled={isGenerating}
-                    >
-                      Reset
-                    </Button>
-                    <Button
-                      onClick={handleGenerateVideo}
-                      disabled={isGenerating || !uploadedImage || !prompt.trim()}
-                      className="flex-1"
-                    >
-                      {isGenerating ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Running...
-                        </>
-                      ) : (
-                        'Run'
-                      )}
-                    </Button>
-                  </div>
-                </TabsContent>
-                <TabsContent value="logs">
-                  <p className="text-sm text-muted-foreground">No session logs yet</p>
-                </TabsContent>
-              </Tabs>
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setPrompt('');
+                      setDuration('8s');
+                      setUploadedImage(null);
+                      setGeneratedVideo(null);
+                      setGenerationStatus('');
+                    }}
+                    disabled={isGenerating}
+                  >
+                    Reset
+                  </Button>
+                  <Button
+                    onClick={handleGenerateVideo}
+                    disabled={isGenerating || !uploadedImage || !prompt.trim()}
+                    className="flex-1"
+                  >
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Running...
+                      </>
+                    ) : (
+                      'Run'
+                    )}
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
 
