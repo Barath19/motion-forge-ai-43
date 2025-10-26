@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { resizeImageTo1280x720 } from '@/utils/imageProcessing';
 import { 
@@ -42,6 +43,7 @@ const GetStarted = () => {
   const [generationStatus, setGenerationStatus] = useState<string>('');
   const [generatedVideo, setGeneratedVideo] = useState<GeneratedVideo | null>(null);
   const [storyboardMode, setStoryboardMode] = useState(false);
+  const [selectedModel, setSelectedModel] = useState<'sora' | 'wan'>('sora');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
@@ -144,35 +146,74 @@ const GetStarted = () => {
     }
 
     setIsGenerating(true);
-    setGenerationStatus('Preparing image...');
-
+    
     try {
-      const resizedImage = await resizeImageTo1280x720(uploadedImage.file);
-      
-      setGenerationStatus('Creating video job...');
-      const job = await createVideoJob({
-        prompt,
-        image: resizedImage,
-      });
+      if (selectedModel === 'wan') {
+        // Use RunPod Wan 2.5 API
+        setGenerationStatus('Generating video with Wan 2.5...');
+        
+        const response = await fetch('https://api.runpod.ai/v2/wan-2-5/run', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer rpa_23OSI446GYJPN51TWZA4IZ9E0WBAB9QC5U7CAY8N1gqpqh'
+          },
+          body: JSON.stringify({
+            input: {
+              prompt: prompt,
+              image: uploadedImage.url,
+              negative_prompt: '',
+              size: '1280*720',
+              duration: parseInt(duration.replace('s', '')),
+              seed: -1,
+              enable_prompt_expansion: false,
+              enable_safety_checker: true
+            }
+          })
+        });
 
-      toast.success(`Video job created: ${job.id}`);
-      setGenerationStatus(`Generating video... (${job.status})`);
+        if (!response.ok) {
+          throw new Error(`RunPod API error: ${response.status}`);
+        }
 
-      const completedJob = await pollForVideoCompletion(job.id, (currentJob: VideoJob) => {
-        setGenerationStatus(`Generating video... ${currentJob.status} ${currentJob.progress ? `(${currentJob.progress}%)` : ''}`);
-      });
+        const data = await response.json();
+        console.log('RunPod response:', data);
+        
+        // Note: You'll need to poll for completion or handle the job ID
+        toast.success('Video generation job started!');
+        setGenerationStatus('Job ID: ' + data.id);
+        
+      } else {
+        // Use existing Sora workflow
+        setGenerationStatus('Preparing image...');
 
-      setGenerationStatus('Downloading and saving video...');
-      const result = await downloadAndStoreVideo(completedJob.id);
+        const resizedImage = await resizeImageTo1280x720(uploadedImage.file);
+        
+        setGenerationStatus('Creating video job...');
+        const job = await createVideoJob({
+          prompt,
+          image: resizedImage,
+        });
 
-      setGeneratedVideo({
-        id: result.videoId,
-        url: result.publicUrl,
-        jobId: completedJob.id,
-      });
+        toast.success(`Video job created: ${job.id}`);
+        setGenerationStatus(`Generating video... (${job.status})`);
 
-      toast.success('Video generated successfully!');
-      setGenerationStatus('Complete!');
+        const completedJob = await pollForVideoCompletion(job.id, (currentJob: VideoJob) => {
+          setGenerationStatus(`Generating video... ${currentJob.status} ${currentJob.progress ? `(${currentJob.progress}%)` : ''}`);
+        });
+
+        setGenerationStatus('Downloading and saving video...');
+        const result = await downloadAndStoreVideo(completedJob.id);
+
+        setGeneratedVideo({
+          id: result.videoId,
+          url: result.publicUrl,
+          jobId: completedJob.id,
+        });
+
+        toast.success('Video generated successfully!');
+        setGenerationStatus('Complete!');
+      }
     } catch (error) {
       console.error('Error generating video:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to generate video');
@@ -239,9 +280,21 @@ const GetStarted = () => {
                 Back
               </Button>
               <div>
-                <h1 className="text-lg font-medium text-foreground/90">OpenAI / SORA 2 Pro I2V</h1>
+                <h1 className="text-lg font-medium text-foreground/90 flex items-center gap-3">
+                  <Select value={selectedModel} onValueChange={(value: 'sora' | 'wan') => setSelectedModel(value)}>
+                    <SelectTrigger className="w-[200px] bg-background">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background border-border">
+                      <SelectItem value="sora">OpenAI / SORA 2 Pro</SelectItem>
+                      <SelectItem value="wan">Wan 2.5 (RunPod)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </h1>
                 <p className="text-sm text-muted-foreground mt-0.5">
-                  OpenAI's Sora 2 Pro is new state of the art video and audio generation model.
+                  {selectedModel === 'sora' 
+                    ? "OpenAI's Sora 2 Pro is new state of the art video and audio generation model."
+                    : "Wan 2.5 by RunPod - Fast and efficient video generation."}
                 </p>
               </div>
             </div>
