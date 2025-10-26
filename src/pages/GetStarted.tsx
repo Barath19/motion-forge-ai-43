@@ -69,6 +69,7 @@ const GetStarted = () => {
   const [showRecordAudio, setShowRecordAudio] = useState(false);
   const [isUploadingScript, setIsUploadingScript] = useState(false);
   const [script, setScript] = useState('');
+  const [showScriptDialog, setShowScriptDialog] = useState(false);
   const recordAudioRef = useRef<HTMLAudioElement | null>(null);
   const [isEditingImage, setIsEditingImage] = useState(false);
   const [editPrompt, setEditPrompt] = useState('');
@@ -312,11 +313,16 @@ const GetStarted = () => {
   };
 
   const handleStartRecording = async () => {
+    setShowScriptDialog(true);
+  };
+
+  const handleSubmitScript = async () => {
     if (!script.trim()) {
       toast.error('Please paste a script first');
       return;
     }
 
+    setShowScriptDialog(false);
     setIsUploadingScript(true);
     
     // Simulate loading for 1 second
@@ -587,13 +593,13 @@ const GetStarted = () => {
                 {/* Prompt */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium text-foreground">Script</label>
+                    <label className="text-sm font-medium text-foreground">Prompt</label>
                     <div className="flex items-center gap-2">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={handleStartRecording}
-                        disabled={isGenerating || isUploadingScript || !script.trim()}
+                        disabled={isGenerating || isUploadingScript}
                         className="h-8"
                       >
                         {isUploadingScript ? (
@@ -630,10 +636,10 @@ const GetStarted = () => {
                     </div>
                   </div>
                   <Textarea
-                    placeholder="Paste your script here..."
-                    value={script}
-                    onChange={(e) => setScript(e.target.value)}
-                    maxLength={5000}
+                    placeholder="Describe your video scene..."
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    maxLength={500}
                     className="min-h-[140px] resize-none bg-card border-border text-foreground"
                     disabled={isGenerating}
                   />
@@ -978,6 +984,41 @@ const GetStarted = () => {
                     </Button>
                   </>
                 )}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Upload Script Dialog */}
+        <Dialog open={showScriptDialog} onOpenChange={setShowScriptDialog}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>Upload Script</DialogTitle>
+              <DialogDescription>
+                Paste your script here and click submit
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <Textarea
+                placeholder="Paste your script here..."
+                value={script}
+                onChange={(e) => setScript(e.target.value)}
+                className="min-h-[300px] resize-none"
+              />
+              
+              <div className="flex gap-3 justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowScriptDialog(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSubmitScript}
+                  disabled={!script.trim()}
+                >
+                  Submit
+                </Button>
               </div>
             </div>
           </DialogContent>
