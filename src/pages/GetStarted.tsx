@@ -405,7 +405,7 @@ const GetStarted = () => {
                   </p>
                   
                   {uploadedImage ? (
-                    <div className="relative aspect-square rounded-lg border border-border bg-card overflow-hidden group">
+                    <div className="relative w-32 h-32 rounded-lg border border-border bg-card overflow-hidden group">
                       <img
                         src={uploadedImage.url}
                         alt={uploadedImage.filename}
@@ -413,14 +413,14 @@ const GetStarted = () => {
                         onClick={() => !isGenerating && setIsEditingImage(true)}
                       />
                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <p className="text-white text-sm font-medium">Click to edit with AI</p>
+                        <p className="text-white text-xs font-medium text-center px-2">Click to edit</p>
                       </div>
                       <button
                         onClick={handleRemoveImage}
-                        className="absolute top-2 right-2 rounded p-1.5 bg-destructive hover:bg-destructive/90 transition-colors z-10"
+                        className="absolute top-1 right-1 rounded p-1 bg-destructive hover:bg-destructive/90 transition-colors z-10"
                         disabled={isGenerating}
                       >
-                        <X className="h-4 w-4 text-white" />
+                        <X className="h-3 w-3 text-white" />
                       </button>
                     </div>
                   ) : (
@@ -431,17 +431,17 @@ const GetStarted = () => {
                       onDrop={handleDrop}
                       onClick={handleUploadClick}
                       className={cn(
-                        "relative aspect-square rounded-lg border-2 border-dashed transition-all cursor-pointer",
+                        "relative w-32 h-32 rounded-lg border-2 border-dashed transition-all cursor-pointer",
                         isDragging
                           ? 'border-primary bg-primary/10'
                           : 'border-border bg-card hover:border-primary/50 hover:bg-primary/5'
                       )}
                     >
-                      <div className="absolute inset-0 flex items-center justify-center p-8">
+                      <div className="absolute inset-0 flex items-center justify-center p-4">
                         <div className="text-center">
-                          <Upload className="mx-auto h-8 w-8 text-muted-foreground/40 mb-2" />
-                          <p className="text-sm text-muted-foreground">
-                            Drag & drop or click to upload
+                          <Upload className="mx-auto h-6 w-6 text-muted-foreground/40 mb-1" />
+                          <p className="text-xs text-muted-foreground">
+                            Upload
                           </p>
                         </div>
                       </div>
