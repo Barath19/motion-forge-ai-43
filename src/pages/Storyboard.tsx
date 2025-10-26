@@ -256,7 +256,6 @@ const Storyboard = () => {
                     id="change-instruction"
                     value={changeInstruction}
                     onChange={(e) => setChangeInstruction(e.target.value)}
-                    placeholder="E.g., 'remove people from background'"
                     className="min-h-[100px]"
                     autoFocus
                   />
