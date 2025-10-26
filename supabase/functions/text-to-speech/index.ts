@@ -45,11 +45,19 @@ serve(async (req) => {
     const initData = await initResponse.json();
     console.log('MCP initialization response:', initData);
 
-    // Now call the tool with proper JSON-RPC format
+    // Extract session ID from response headers
+    const sessionId = initResponse.headers.get('x-mcp-session-id') || 
+                     initResponse.headers.get('mcp-session-id') ||
+                     initData.sessionId;
+    
+    console.log('Session ID:', sessionId);
+
+    // Now call the tool with session ID header
     const response = await fetch(MCP_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...(sessionId && { 'x-mcp-session-id': sessionId }),
       },
       body: JSON.stringify({
         jsonrpc: '2.0',
