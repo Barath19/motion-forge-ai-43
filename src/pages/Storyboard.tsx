@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -31,6 +32,7 @@ interface Scene {
 }
 
 const Storyboard = () => {
+  const navigate = useNavigate();
   const [tiles, setTiles] = useState<Scene[]>([
     { 
       id: 1, height: 'h-64', content: 'Scene 1', image: scene1, originalImage: scene1Original,
@@ -236,7 +238,11 @@ const Storyboard = () => {
               Organize your scenes and visualize your story
             </p>
           </div>
-          <Button size="lg" className="gap-2">
+          <Button 
+            size="lg" 
+            className="gap-2"
+            onClick={() => navigate('/rendering', { state: { scenes: tiles } })}
+          >
             <Plus className="h-5 w-5" />
             Generate Video
           </Button>
