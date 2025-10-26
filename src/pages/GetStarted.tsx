@@ -56,6 +56,8 @@ const GetStarted = () => {
   const [isEditingImage, setIsEditingImage] = useState(false);
   const [editPrompt, setEditPrompt] = useState('');
   const [isEditingAI, setIsEditingAI] = useState(false);
+  const [originalImage, setOriginalImage] = useState<UploadedImage | null>(null);
+  const [editedImagePreview, setEditedImagePreview] = useState<string | null>(null);
 
   const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault();
@@ -93,11 +95,14 @@ const GetStarted = () => {
     }
 
     const url = URL.createObjectURL(file);
-    setUploadedImage({
+    const newImage = {
       url,
       filename: file.name,
       file,
-    });
+    };
+    setUploadedImage(newImage);
+    setOriginalImage(newImage); // Store original
+    setEditedImagePreview(null); // Clear any preview
     toast.success('Image uploaded successfully');
   };
 
@@ -126,6 +131,8 @@ const GetStarted = () => {
     if (uploadedImage) {
       URL.revokeObjectURL(uploadedImage.url);
       setUploadedImage(null);
+      setOriginalImage(null);
+      setEditedImagePreview(null);
       toast.success('Image removed');
     }
   };
@@ -317,14 +324,30 @@ const GetStarted = () => {
         throw new Error('No edited image returned');
       }
 
+      // Show preview in dialog
+      setEditedImagePreview(editedImageUrl);
+      toast.success('Image edited! Review and save or revert.');
+      setEditPrompt('');
+    } catch (error) {
+      console.error('Error editing image:', error);
+      toast.error('Failed to edit image');
+    } finally {
+      setIsEditingAI(false);
+    }
+  };
+
+  const handleSaveEditedImage = async () => {
+    if (!editedImagePreview) return;
+
+    try {
       // Convert base64 to blob and create object URL
-      const base64Response = await fetch(editedImageUrl);
+      const base64Response = await fetch(editedImagePreview);
       const blob = await base64Response.blob();
       const newFile = new File([blob], 'edited-image.png', { type: 'image/png' });
       const newUrl = URL.createObjectURL(blob);
 
-      // Clean up old URL
-      if (uploadedImage.url) {
+      // Clean up old URL (but keep original)
+      if (uploadedImage && uploadedImage.url !== originalImage?.url) {
         URL.revokeObjectURL(uploadedImage.url);
       }
 
@@ -334,15 +357,26 @@ const GetStarted = () => {
         file: newFile,
       });
 
-      toast.success('Image edited successfully!');
+      toast.success('Edited image saved!');
       setIsEditingImage(false);
-      setEditPrompt('');
+      setEditedImagePreview(null);
     } catch (error) {
-      console.error('Error editing image:', error);
-      toast.error('Failed to edit image');
-    } finally {
-      setIsEditingAI(false);
+      console.error('Error saving edited image:', error);
+      toast.error('Failed to save edited image');
     }
+  };
+
+  const handleRevertToOriginal = () => {
+    if (!originalImage) return;
+
+    // Clean up edited image URL
+    if (uploadedImage && uploadedImage.url !== originalImage.url) {
+      URL.revokeObjectURL(uploadedImage.url);
+    }
+
+    setUploadedImage(originalImage);
+    setEditedImagePreview(null);
+    toast.success('Reverted to original image');
   };
 
   return (
@@ -703,23 +737,52 @@ const GetStarted = () => {
 
         {/* AI Image Edit Dialog */}
         <Dialog open={isEditingImage} onOpenChange={setIsEditingImage}>
-          <DialogContent className="sm:max-w-[500px]">
+          <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
               <DialogTitle>Edit Image with AI</DialogTitle>
               <DialogDescription>
-                Describe how you want to modify the image
+                Describe how you want to modify the image, then save or revert to original
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              {uploadedImage && (
-                <div className="aspect-square rounded-lg overflow-hidden border border-border">
-                  <img
-                    src={uploadedImage.url}
-                    alt="Original"
-                    className="w-full h-full object-cover"
-                  />
+              <div className="grid grid-cols-2 gap-4">
+                {/* Original Image */}
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-foreground">Original</p>
+                  {originalImage && (
+                    <div className="aspect-square rounded-lg overflow-hidden border border-border">
+                      <img
+                        src={originalImage.url}
+                        alt="Original"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
                 </div>
-              )}
+                
+                {/* Edited Preview */}
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-foreground">
+                    {editedImagePreview ? 'Edited' : 'Current'}
+                  </p>
+                  <div className="aspect-square rounded-lg overflow-hidden border border-border">
+                    {editedImagePreview ? (
+                      <img
+                        src={editedImagePreview}
+                        alt="Edited"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : uploadedImage ? (
+                      <img
+                        src={uploadedImage.url}
+                        alt="Current"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+
               <Textarea
                 placeholder="e.g., Make it more colorful, add snow, change to sunset lighting..."
                 value={editPrompt}
@@ -727,32 +790,54 @@ const GetStarted = () => {
                 className="min-h-[100px] resize-none"
                 disabled={isEditingAI}
               />
+              
               <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setIsEditingImage(false);
-                    setEditPrompt('');
-                  }}
-                  disabled={isEditingAI}
-                  className="flex-1"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleEditImage}
-                  disabled={isEditingAI || !editPrompt.trim()}
-                  className="flex-1"
-                >
-                  {isEditingAI ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Editing...
-                    </>
-                  ) : (
-                    'Edit Image'
-                  )}
-                </Button>
+                {editedImagePreview ? (
+                  <>
+                    <Button
+                      variant="outline"
+                      onClick={handleRevertToOriginal}
+                      disabled={isEditingAI}
+                      className="flex-1"
+                    >
+                      Revert to Original
+                    </Button>
+                    <Button
+                      onClick={handleSaveEditedImage}
+                      className="flex-1"
+                    >
+                      Save Edited Image
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setIsEditingImage(false);
+                        setEditPrompt('');
+                      }}
+                      disabled={isEditingAI}
+                      className="flex-1"
+                    >
+                      Close
+                    </Button>
+                    <Button
+                      onClick={handleEditImage}
+                      disabled={isEditingAI || !editPrompt.trim()}
+                      className="flex-1"
+                    >
+                      {isEditingAI ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Editing...
+                        </>
+                      ) : (
+                        'Edit Image'
+                      )}
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </DialogContent>
