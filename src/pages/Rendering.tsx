@@ -150,14 +150,12 @@ const Rendering = () => {
                         ) : status === 'processing' ? (
                           <>
                             <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                            <Badge>
-                              Processing {formatTime(timeRemaining)}
-                            </Badge>
+                            <Badge>Processing</Badge>
                           </>
                         ) : (
                           <>
                             <Clock className="h-5 w-5 text-muted-foreground" />
-                            <Badge variant="outline">Pending</Badge>
+                            <Badge variant="outline">Queued</Badge>
                           </>
                         )}
                       </div>
