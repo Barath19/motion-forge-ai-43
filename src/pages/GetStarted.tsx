@@ -31,7 +31,8 @@ interface GeneratedVideo {
   jobId: string;
 }
 
-const durations = ['4s', '8s', '12s'];
+const soraDurations = ['4s', '8s', '12s'];
+const wanDurations = ['5s', '12s'];
 
 const GetStarted = () => {
   const navigate = useNavigate();
@@ -281,7 +282,14 @@ const GetStarted = () => {
               </Button>
               <div>
                 <h1 className="text-lg font-medium text-foreground/90 flex items-center gap-3">
-                  <Select value={selectedModel} onValueChange={(value: 'sora' | 'wan') => setSelectedModel(value)}>
+                  <Select 
+                    value={selectedModel} 
+                    onValueChange={(value: 'sora' | 'wan') => {
+                      setSelectedModel(value);
+                      // Reset duration to first option of new model
+                      setDuration(value === 'wan' ? '5s' : '8s');
+                    }}
+                  >
                     <SelectTrigger className="w-[200px] bg-background">
                       <SelectValue />
                     </SelectTrigger>
@@ -401,7 +409,7 @@ const GetStarted = () => {
                     <label className="text-sm font-medium text-foreground/90">Duration</label>
                     <p className="text-xs text-muted-foreground">Duration in seconds</p>
                     <div className="flex gap-2">
-                      {durations.map((d) => (
+                      {(selectedModel === 'wan' ? wanDurations : soraDurations).map((d) => (
                         <Button
                           key={d}
                           variant={duration === d ? "default" : "outline"}
