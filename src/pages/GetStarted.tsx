@@ -876,35 +876,84 @@ const GetStarted = () => {
                       <p className="text-sm text-muted-foreground">No videos in history yet</p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {videoHistory.map((item) => (
-                        <div key={item.id} className="rounded-lg border border-border bg-card overflow-hidden">
-                          <video
-                            src={item.video_url}
-                            controls
-                            className="w-full aspect-video"
-                          />
-                          <div className="p-3 space-y-2">
-                            <p className="text-sm text-foreground line-clamp-2">{item.prompt}</p>
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                              <span className="px-2 py-0.5 rounded bg-background">
-                                {item.model === 'sora' ? 'SORA 2' : 'Wan 2.5'}
-                              </span>
-                              <span>{item.duration}</span>
-                              <span>•</span>
-                              <span>{new Date(item.created_at).toLocaleDateString()}</span>
-                            </div>
-                            <a
-                              href={item.video_url}
-                              download
-                              className="inline-flex items-center gap-2 text-xs text-primary hover:text-primary/80 transition-colors"
-                            >
-                              <Download className="h-3 w-3" />
-                              Download
-                            </a>
+                    <div className="space-y-6">
+                      {/* Carousel View */}
+                      <div className="relative">
+                        <h3 className="text-sm font-medium text-muted-foreground mb-4">Recent Videos</h3>
+                        <div className="relative flex w-full overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
+                          <div className="flex gap-4 px-2">
+                            {videoHistory.map((item) => (
+                              <div
+                                key={`carousel-${item.id}`}
+                                className="flex-shrink-0 h-[280px] w-auto overflow-hidden rounded-xl border border-border bg-card hover:border-primary/50 transition-all duration-300 group"
+                                style={{ aspectRatio: '9 / 16' }}
+                              >
+                                <div className="relative h-full w-full">
+                                  <video
+                                    src={item.video_url}
+                                    loop
+                                    muted
+                                    playsInline
+                                    className="h-full w-full object-cover"
+                                    onMouseEnter={(e) => e.currentTarget.play()}
+                                    onMouseLeave={(e) => {
+                                      e.currentTarget.pause();
+                                      e.currentTarget.currentTime = 0;
+                                    }}
+                                  />
+                                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    <div className="absolute bottom-0 left-0 right-0 p-3 space-y-1">
+                                      <p className="text-xs text-white line-clamp-2 font-medium">{item.prompt}</p>
+                                      <div className="flex items-center gap-2 text-[10px] text-white/70">
+                                        <span className="px-1.5 py-0.5 rounded bg-white/10 backdrop-blur-sm">
+                                          {item.model === 'sora' ? 'SORA 2' : 'Wan 2.5'}
+                                        </span>
+                                        <span>{item.duration}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <Play className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-12 w-12 text-white/80 pointer-events-none" />
+                                </div>
+                              </div>
+                            ))}
                           </div>
                         </div>
-                      ))}
+                      </div>
+
+                      {/* Grid View */}
+                      <div>
+                        <h3 className="text-sm font-medium text-muted-foreground mb-4">All Videos</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {videoHistory.map((item) => (
+                            <div key={item.id} className="rounded-lg border border-border bg-card overflow-hidden">
+                              <video
+                                src={item.video_url}
+                                controls
+                                className="w-full aspect-video"
+                              />
+                              <div className="p-3 space-y-2">
+                                <p className="text-sm text-foreground line-clamp-2">{item.prompt}</p>
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                  <span className="px-2 py-0.5 rounded bg-background">
+                                    {item.model === 'sora' ? 'SORA 2' : 'Wan 2.5'}
+                                  </span>
+                                  <span>{item.duration}</span>
+                                  <span>•</span>
+                                  <span>{new Date(item.created_at).toLocaleDateString()}</span>
+                                </div>
+                                <a
+                                  href={item.video_url}
+                                  download
+                                  className="inline-flex items-center gap-2 text-xs text-primary hover:text-primary/80 transition-colors"
+                                >
+                                  <Download className="h-3 w-3" />
+                                  Download
+                                </a>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
