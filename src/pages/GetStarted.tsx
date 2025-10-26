@@ -420,18 +420,23 @@ const GetStarted = () => {
                   </p>
                   
                   {uploadedImage ? (
-                    <div className="relative w-32 h-32 rounded-lg border border-border bg-card overflow-hidden group">
+                    <div 
+                      className="relative w-32 h-32 rounded-lg border border-border bg-card overflow-hidden group cursor-pointer"
+                      onClick={() => !isGenerating && setIsEditingImage(true)}
+                    >
                       <img
                         src={uploadedImage.url}
                         alt={uploadedImage.filename}
-                        className="w-full h-full object-cover cursor-pointer"
-                        onClick={() => !isGenerating && setIsEditingImage(true)}
+                        className="w-full h-full object-cover"
                       />
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
                         <p className="text-white text-xs font-medium text-center px-2">Click to edit</p>
                       </div>
                       <button
-                        onClick={handleRemoveImage}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveImage();
+                        }}
                         className="absolute top-1 right-1 rounded p-1 bg-destructive hover:bg-destructive/90 transition-colors z-10"
                         disabled={isGenerating}
                       >
