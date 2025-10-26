@@ -78,40 +78,13 @@ const Storyboard = () => {
   const [editedName, setEditedName] = useState('');
   const [editedSeconds, setEditedSeconds] = useState(12);
   const [editedPrompt, setEditedPrompt] = useState('');
-  const [changeInstruction, setChangeInstruction] = useState('');
-  const [showChangeMode, setShowChangeMode] = useState(false);
 
   const handleSceneClick = (scene: Scene) => {
     setSelectedScene(scene);
     setEditedName(scene.name);
     setEditedSeconds(scene.seconds);
     setEditedPrompt(scene.prompt);
-    setChangeInstruction('');
-    setShowChangeMode(false);
     setIsDialogOpen(true);
-  };
-
-  const convertImageToBase64 = async (imageUrl: string): Promise<string> => {
-    try {
-      // If it's already a base64 string, return it
-      if (imageUrl.startsWith('data:')) {
-        return imageUrl;
-      }
-
-      // For local imports, we need to fetch and convert
-      const response = await fetch(imageUrl);
-      const blob = await response.blob();
-      
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-    } catch (error) {
-      console.error('Error converting image to base64:', error);
-      throw error;
-    }
   };
 
   const handleGenerateImage = async () => {
@@ -119,22 +92,11 @@ const Storyboard = () => {
 
     setIsGenerating(true);
     try {
-      let requestBody: any = {
-        prompt: editedPrompt
-      };
-
-      // If in change mode, include the change instruction and existing image
-      if (showChangeMode && changeInstruction.trim()) {
-        const base64Image = await convertImageToBase64(selectedScene.image);
-        requestBody = {
-          prompt: editedPrompt,
-          changeInstruction: changeInstruction,
-          existingImageBase64: base64Image
-        };
-      }
-
       const { data, error } = await supabase.functions.invoke('generate-scene-image', {
-        body: requestBody
+        body: { 
+          prompt: editedPrompt,
+          existingImage: selectedScene.image 
+        }
       });
 
       if (error) throw error;
@@ -167,9 +129,7 @@ const Storyboard = () => {
         prompt: editedPrompt
       } : null);
 
-      toast.success(showChangeMode ? 'Image modified successfully!' : 'Image generated successfully!');
-      setShowChangeMode(false);
-      setChangeInstruction('');
+      toast.success('Image generated successfully!');
     } catch (error) {
       console.error('Error generating image:', error);
       toast.error('Failed to generate image');
@@ -276,66 +236,31 @@ const Storyboard = () => {
                     onChange={(e) => setEditedPrompt(e.target.value)}
                     placeholder="Describe the scene in detail..."
                     className="min-h-[200px]"
-                    disabled={showChangeMode}
                   />
                 </div>
-
-                {showChangeMode && (
-                  <div className="grid gap-2 p-4 border border-primary/20 rounded-lg bg-primary/5">
-                    <Label htmlFor="change-instruction">Change Instruction</Label>
-                    <Textarea
-                      id="change-instruction"
-                      value={changeInstruction}
-                      onChange={(e) => setChangeInstruction(e.target.value)}
-                      placeholder="e.g., remove the people from background, change lighting to sunset, add more details..."
-                      className="min-h-[100px]"
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      This will modify the current image based on your instruction
-                    </p>
-                  </div>
-                )}
               </div>
 
-              <div className="flex gap-3 justify-between">
+              <div className="flex gap-3 justify-end">
                 <Button
                   variant="outline"
-                  onClick={() => {
-                    setShowChangeMode(!showChangeMode);
-                    if (showChangeMode) {
-                      setChangeInstruction('');
-                    }
-                  }}
+                  onClick={() => setIsDialogOpen(false)}
                   disabled={isGenerating}
                 >
-                  {showChangeMode ? 'Back to Generate' : 'Change Scene'}
+                  Cancel
                 </Button>
-                <div className="flex gap-3">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setIsDialogOpen(false);
-                      setShowChangeMode(false);
-                      setChangeInstruction('');
-                    }}
-                    disabled={isGenerating}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={handleGenerateImage}
-                    disabled={isGenerating || (!editedPrompt.trim() && !showChangeMode) || (showChangeMode && !changeInstruction.trim())}
-                  >
-                    {isGenerating ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        {showChangeMode ? 'Modifying...' : 'Generating...'}
-                      </>
-                    ) : (
-                      showChangeMode ? 'Apply Changes' : 'Generate Image'
-                    )}
-                  </Button>
-                </div>
+                <Button
+                  onClick={handleGenerateImage}
+                  disabled={isGenerating || !editedPrompt.trim()}
+                >
+                  {isGenerating ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    'Generate Image'
+                  )}
+                </Button>
               </div>
             </div>
           )}

@@ -11,38 +11,32 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, changeInstruction, existingImageBase64 } = await req.json();
+    const { prompt, existingImage } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    console.log("Request type:", changeInstruction ? "Change scene" : "Generate new");
-    console.log("Prompt:", prompt);
+    console.log("Generating image with prompt:", prompt);
 
-    // Build the message content
-    const messageContent: any[] = [];
-
-    // If we have a change instruction with existing image, edit it
-    if (changeInstruction && existingImageBase64) {
-      console.log("Editing existing image with instruction:", changeInstruction);
-      messageContent.push({
+    // Build the message content based on whether we're editing or generating new
+    const messageContent: any[] = [
+      {
         type: "text",
-        text: `${changeInstruction}. Base scene description: ${prompt}`
-      });
+        text: existingImage 
+          ? `Edit this image based on the following prompt: ${prompt}`
+          : prompt
+      }
+    ];
+
+    // If editing an existing image, include it in the request
+    if (existingImage) {
       messageContent.push({
         type: "image_url",
         image_url: {
-          url: existingImageBase64
+          url: existingImage
         }
-      });
-    } else {
-      // Otherwise, generate a new image from the prompt
-      console.log("Generating new image from prompt");
-      messageContent.push({
-        type: "text",
-        text: prompt
       });
     }
 
