@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { resizeImageTo1280x720 } from '@/utils/imageProcessing';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   createVideoJob, 
   pollForVideoCompletion, 
@@ -284,53 +285,33 @@ const GetStarted = () => {
 
     setIsEditingAI(true);
     try {
-      const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'google/gemini-2.5-flash-image-preview',
-          messages: [
-            {
-              role: 'user',
-              content: [
-                {
-                  type: 'text',
-                  text: editPrompt
-                },
-                {
-                  type: 'image_url',
-                  image_url: {
-                    url: uploadedImage.url
-                  }
-                }
-              ]
-            }
-          ],
-          modalities: ['image', 'text']
-        })
+      console.log('Starting image edit...');
+      
+      const { data, error } = await supabase.functions.invoke('edit-image', {
+        body: { 
+          imageUrl: uploadedImage.url,
+          prompt: editPrompt 
+        }
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to edit image');
+      if (error) {
+        console.error('Edge function error:', error);
+        throw new Error(error.message || 'Failed to edit image');
       }
 
-      const data = await response.json();
-      const editedImageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-
-      if (!editedImageUrl) {
+      if (!data?.imageUrl) {
         throw new Error('No edited image returned');
       }
 
+      console.log('Image edited successfully');
+      
       // Show preview in dialog
-      setEditedImagePreview(editedImageUrl);
+      setEditedImagePreview(data.imageUrl);
       toast.success('Image edited! Review and save or revert.');
       setEditPrompt('');
     } catch (error) {
       console.error('Error editing image:', error);
-      toast.error('Failed to edit image');
+      toast.error(error instanceof Error ? error.message : 'Failed to edit image');
     } finally {
       setIsEditingAI(false);
     }

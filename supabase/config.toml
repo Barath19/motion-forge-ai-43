@@ -14,3 +14,6 @@ verify_jwt = false
 
 [functions.generate-scene-image]
 verify_jwt = false
+
+[functions.edit-image]
+verify_jwt = false
