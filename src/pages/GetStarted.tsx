@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useState, useRef } from 'react';
-import { Upload, X, Download, Loader2 } from 'lucide-react';
+import { Upload, X, Download, Loader2, Mic, Square, Play, Volume2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -12,6 +12,8 @@ import {
   downloadAndStoreVideo,
   type VideoJob 
 } from '@/utils/videoGeneration';
+import { useVoiceRecorder } from '@/hooks/useVoiceRecorder';
+import { convertTextToSpeech } from '@/utils/elevenLabsTTS';
 
 interface UploadedImage {
   url: string;
@@ -36,6 +38,11 @@ const GetStarted = () => {
   const [generationStatus, setGenerationStatus] = useState<string>('');
   const [generatedVideo, setGeneratedVideo] = useState<GeneratedVideo | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  
+  const { isRecording, audioBlob, startRecording, stopRecording, clearRecording } = useVoiceRecorder();
+  const [isConvertingTTS, setIsConvertingTTS] = useState(false);
+  const [ttsAudioUrl, setTtsAudioUrl] = useState<string | null>(null);
 
   const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault();
@@ -164,6 +171,46 @@ const GetStarted = () => {
     }
   };
 
+  const handleStartRecording = async () => {
+    try {
+      await startRecording();
+      toast.success('Recording started');
+    } catch (error) {
+      toast.error('Failed to start recording. Please allow microphone access.');
+    }
+  };
+
+  const handleStopRecording = () => {
+    stopRecording();
+    toast.success('Recording stopped');
+  };
+
+  const handleConvertToSpeech = async () => {
+    if (!prompt.trim()) {
+      toast.error('Please enter text to convert to speech');
+      return;
+    }
+
+    setIsConvertingTTS(true);
+    try {
+      const audioBlob = await convertTextToSpeech(prompt);
+      const url = URL.createObjectURL(audioBlob);
+      setTtsAudioUrl(url);
+      toast.success('Text converted to speech!');
+    } catch (error) {
+      console.error('Error converting to speech:', error);
+      toast.error('Failed to convert text to speech');
+    } finally {
+      setIsConvertingTTS(false);
+    }
+  };
+
+  const handlePlayTTS = () => {
+    if (ttsAudioUrl && audioRef.current) {
+      audioRef.current.play();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-foreground">
       <main className="relative">
@@ -189,7 +236,49 @@ const GetStarted = () => {
                 <TabsContent value="playground" className="space-y-6 mt-6">
                   {/* Prompt */}
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground/90">Prompt</label>
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium text-foreground/90">Prompt</label>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={isRecording ? handleStopRecording : handleStartRecording}
+                          disabled={isGenerating}
+                          className="h-8"
+                        >
+                          {isRecording ? (
+                            <>
+                              <Square className="h-3 w-3 mr-1 fill-current" />
+                              Stop
+                            </>
+                          ) : (
+                            <>
+                              <Mic className="h-3 w-3 mr-1" />
+                              Record
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleConvertToSpeech}
+                          disabled={isGenerating || isConvertingTTS || !prompt.trim()}
+                          className="h-8"
+                        >
+                          {isConvertingTTS ? (
+                            <>
+                              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                              Converting...
+                            </>
+                          ) : (
+                            <>
+                              <Volume2 className="h-3 w-3 mr-1" />
+                              TTS
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
                     <Textarea
                       placeholder="Describe your video scene..."
                       value={prompt}
@@ -198,6 +287,34 @@ const GetStarted = () => {
                       className="min-h-[140px] resize-none bg-background border-border/20 text-foreground"
                       disabled={isGenerating}
                     />
+                    {audioBlob && (
+                      <div className="flex items-center gap-2 p-2 rounded bg-background/50 border border-border/20">
+                        <audio src={URL.createObjectURL(audioBlob)} controls className="flex-1 h-8" />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={clearRecording}
+                          className="h-8 px-2"
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    )}
+                    {ttsAudioUrl && (
+                      <div className="flex items-center gap-2 p-2 rounded bg-background/50 border border-border/20">
+                        <audio ref={audioRef} src={ttsAudioUrl} className="hidden" />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={handlePlayTTS}
+                          className="h-8"
+                        >
+                          <Play className="h-3 w-3 mr-1" />
+                          Play TTS
+                        </Button>
+                        <audio src={ttsAudioUrl} controls className="flex-1 h-8" />
+                      </div>
+                    )}
                   </div>
 
                   {/* Duration */}
