@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Plus, Loader2, RotateCcw } from 'lucide-react';
+import { Plus, Loader2, RotateCcw, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import scene1Original from '@/assets/storyboard/scene-1.jpg';
@@ -229,6 +229,15 @@ const Storyboard = () => {
       <Navigation />
       
       <main className="container mx-auto px-4 py-24">
+        <Button 
+          variant="ghost" 
+          className="mb-6 gap-2"
+          onClick={() => navigate(-1)}
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </Button>
+
         <div className="mb-12 flex items-center justify-between">
           <div>
             <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">

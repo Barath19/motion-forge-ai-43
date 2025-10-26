@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useState, useRef } from 'react';
-import { Upload, X, Download, Loader2, Mic, Square, Play, Volume2, LayoutGrid } from 'lucide-react';
+import { Upload, X, Download, Loader2, Mic, Square, Play, Volume2, LayoutGrid, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -219,11 +219,22 @@ const GetStarted = () => {
         {/* Header */}
         <div className="border-b border-border/10 bg-[#0f0f0f] px-6 py-4">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-lg font-medium text-foreground/90">OpenAI / SORA 2 Pro I2V</h1>
-              <p className="text-sm text-muted-foreground mt-0.5">
-                OpenAI's Sora 2 Pro is new state of the art video and audio generation model.
-              </p>
+            <div className="flex items-center gap-4">
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className="gap-2"
+                onClick={() => navigate(-1)}
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </Button>
+              <div>
+                <h1 className="text-lg font-medium text-foreground/90">OpenAI / SORA 2 Pro I2V</h1>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  OpenAI's Sora 2 Pro is new state of the art video and audio generation model.
+                </p>
+              </div>
             </div>
             <Button
               variant="outline"

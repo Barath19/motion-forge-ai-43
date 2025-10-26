@@ -1,11 +1,12 @@
 import { useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Clock, CheckCircle2, Loader2, Play, Download } from 'lucide-react';
+import { Clock, CheckCircle2, Loader2, Play, Download, ArrowLeft } from 'lucide-react';
 
 interface Scene {
   id: number;
@@ -56,6 +57,7 @@ const mockCompletedVideos: CompletedVideo[] = [
 
 const Rendering = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const scenes = (location.state?.scenes as Scene[]) || [];
   const [processingIndex, setProcessingIndex] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(150); // 2.5 minutes in seconds
@@ -94,6 +96,15 @@ const Rendering = () => {
       <Navigation />
       
       <main className="container mx-auto px-4 py-24">
+        <Button 
+          variant="ghost" 
+          className="mb-6 gap-2"
+          onClick={() => navigate(-1)}
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </Button>
+
         <div className="mb-12">
           <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
             Video Rendering
