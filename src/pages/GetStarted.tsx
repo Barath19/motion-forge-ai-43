@@ -245,15 +245,6 @@ const GetStarted = () => {
                 </p>
               </div>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate('/storyboard')}
-              className="gap-2"
-            >
-              <LayoutGrid className="h-4 w-4" />
-              Storyboard
-            </Button>
           </div>
         </div>
 
