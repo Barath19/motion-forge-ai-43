@@ -19,6 +19,8 @@ serve(async (req) => {
     const formData = await req.formData();
     const prompt = formData.get('prompt') as string;
     const imageFile = formData.get('image') as File;
+    const duration = formData.get('duration') as string || '12';
+    const resolution = formData.get('resolution') as string || '1280x720';
 
     if (!prompt) {
       return new Response(
@@ -28,14 +30,16 @@ serve(async (req) => {
     }
 
     console.log('Creating video with prompt:', prompt);
+    console.log('Duration:', duration);
+    console.log('Resolution:', resolution);
     console.log('Image file:', imageFile ? `${imageFile.name} (${imageFile.size} bytes)` : 'none');
 
     // Create form data for OpenAI API
     const openaiFormData = new FormData();
     openaiFormData.append('model', 'sora-2');
     openaiFormData.append('prompt', prompt);
-    openaiFormData.append('seconds', '12');
-    openaiFormData.append('size', '1280x720');
+    openaiFormData.append('seconds', duration);
+    openaiFormData.append('size', resolution);
     
     if (imageFile) {
       openaiFormData.append('input_reference', imageFile, imageFile.name);

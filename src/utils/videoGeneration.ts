@@ -3,6 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 export interface VideoGenerationOptions {
   prompt: string;
   image?: Blob;
+  duration?: string;
+  resolution?: string;
 }
 
 export interface VideoJob {
@@ -27,6 +29,14 @@ export interface VideoResult {
 export const createVideoJob = async (options: VideoGenerationOptions): Promise<VideoJob> => {
   const formData = new FormData();
   formData.append('prompt', options.prompt);
+  
+  if (options.duration) {
+    formData.append('duration', options.duration);
+  }
+  
+  if (options.resolution) {
+    formData.append('resolution', options.resolution);
+  }
   
   if (options.image) {
     formData.append('image', options.image, 'reference.jpg');

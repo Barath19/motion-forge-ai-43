@@ -280,6 +280,8 @@ const GetStarted = () => {
         const job = await createVideoJob({
           prompt,
           image: resizedImage,
+          duration,
+          resolution,
         });
 
         toast.success(`Video job created: ${job.id}`);
