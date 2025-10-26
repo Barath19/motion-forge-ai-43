@@ -459,6 +459,24 @@ const GetStarted = () => {
                   )}
                 </div>
 
+                {/* Storyboard Toggle */}
+                <div className="flex items-center justify-between rounded-lg border border-border/20 bg-background p-4">
+                  <div className="flex-1">
+                    <Label htmlFor="storyboard-mode" className="text-sm font-medium text-foreground/90">
+                      Storyboard Mode
+                    </Label>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Enable to organize scenes before generating video
+                    </p>
+                  </div>
+                  <Switch
+                    id="storyboard-mode"
+                    checked={storyboardMode}
+                    onCheckedChange={setStoryboardMode}
+                    disabled={isGenerating}
+                  />
+                </div>
+
                 {/* Duration */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground/90">Duration</label>
@@ -477,24 +495,6 @@ const GetStarted = () => {
                       </Button>
                     ))}
                   </div>
-                </div>
-
-                {/* Storyboard Toggle */}
-                <div className="flex items-center justify-between rounded-lg border border-border/20 bg-background p-4">
-                  <div className="flex-1">
-                    <Label htmlFor="storyboard-mode" className="text-sm font-medium text-foreground/90">
-                      Storyboard Mode
-                    </Label>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Enable to organize scenes before generating video
-                    </p>
-                  </div>
-                  <Switch
-                    id="storyboard-mode"
-                    checked={storyboardMode}
-                    onCheckedChange={setStoryboardMode}
-                    disabled={isGenerating}
-                  />
                 </div>
 
                 {/* Action Buttons */}
