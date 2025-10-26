@@ -287,9 +287,22 @@ const GetStarted = () => {
     try {
       console.log('Starting image edit...');
       
+      // Convert blob URL to base64
+      const response = await fetch(uploadedImage.url);
+      const blob = await response.blob();
+      const reader = new FileReader();
+      
+      const base64Image = await new Promise<string>((resolve, reject) => {
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+
+      console.log('Image converted to base64');
+      
       const { data, error } = await supabase.functions.invoke('edit-image', {
         body: { 
-          imageUrl: uploadedImage.url,
+          imageUrl: base64Image,
           prompt: editPrompt 
         }
       });
