@@ -443,6 +443,17 @@ const GetStarted = () => {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-foreground">
+      {/* Storyboard Generation Overlay */}
+      {isGeneratingStoryboard && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="h-16 w-16 animate-spin text-primary mx-auto mb-6" />
+            <h3 className="text-2xl font-semibold text-foreground mb-2">Generating Storyboard</h3>
+            <p className="text-muted-foreground">Creating your scenes...</p>
+          </div>
+        </div>
+      )}
+
       <main className="relative">
         {/* Header */}
         <div className="border-b border-border bg-[#0f0f0f] px-6 py-4">
