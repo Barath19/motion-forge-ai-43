@@ -28,10 +28,15 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        tool: 'ELEVEN_LABS__CREATE_SPEECH',
-        parameters: {
-          voice_id: VOICE_ID,
-          text: text
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'tools/call',
+        params: {
+          name: 'ELEVEN_LABS__CREATE_SPEECH',
+          arguments: {
+            voice_id: VOICE_ID,
+            text: text
+          }
         }
       }),
     });
