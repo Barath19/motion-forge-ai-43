@@ -631,19 +631,6 @@ const GetStarted = () => {
                     className="min-h-[140px] resize-none bg-card border-border text-foreground"
                     disabled={isGenerating}
                   />
-                  {audioBlob && (
-                    <div className="flex items-center gap-2 p-2 rounded bg-card border border-border">
-                      <audio src={URL.createObjectURL(audioBlob)} controls className="flex-1 h-8" />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={clearRecording}
-                        className="h-8 px-2"
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  )}
                   {showRecordAudio && (
                     <div className="flex items-center gap-2 p-2 rounded bg-card border border-border">
                       <audio src={recordAudio} controls className="flex-1 h-8" />
