@@ -67,6 +67,8 @@ const GetStarted = () => {
   const [ttsAudioUrl, setTtsAudioUrl] = useState<string | null>(null);
   const [isPlayingRecordAudio, setIsPlayingRecordAudio] = useState(false);
   const [showRecordAudio, setShowRecordAudio] = useState(false);
+  const [isUploadingScript, setIsUploadingScript] = useState(false);
+  const [script, setScript] = useState('');
   const recordAudioRef = useRef<HTMLAudioElement | null>(null);
   const [isEditingImage, setIsEditingImage] = useState(false);
   const [editPrompt, setEditPrompt] = useState('');
@@ -310,20 +312,24 @@ const GetStarted = () => {
   };
 
   const handleStartRecording = async () => {
-    try {
-      await startRecording();
-      toast.success('Recording started');
-    } catch (error) {
-      toast.error('Failed to start recording. Please allow microphone access.');
+    if (!script.trim()) {
+      toast.error('Please paste a script first');
+      return;
     }
+
+    setIsUploadingScript(true);
+    
+    // Simulate loading for 1 second
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    setIsUploadingScript(false);
+    setShowRecordAudio(true);
+    toast.success('Script uploaded');
   };
 
   const handleStopRecording = async () => {
-    stopRecording();
-    toast.success('Recording stopped');
-    
-    // Show the audio player
-    setShowRecordAudio(true);
+    setShowRecordAudio(false);
+    toast.success('Audio stopped');
   };
 
   const handleConvertToSpeech = async () => {
@@ -581,24 +587,24 @@ const GetStarted = () => {
                 {/* Prompt */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium text-foreground">Prompt</label>
+                    <label className="text-sm font-medium text-foreground">Script</label>
                     <div className="flex items-center gap-2">
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={isRecording ? handleStopRecording : handleStartRecording}
-                        disabled={isGenerating}
+                        onClick={handleStartRecording}
+                        disabled={isGenerating || isUploadingScript || !script.trim()}
                         className="h-8"
                       >
-                        {isRecording ? (
+                        {isUploadingScript ? (
                           <>
-                            <Square className="h-3 w-3 mr-1 fill-current" />
-                            Stop
+                            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                            Loading...
                           </>
                         ) : (
                           <>
-                            <Mic className="h-3 w-3 mr-1" />
-                            Record
+                            <Upload className="h-3 w-3 mr-1" />
+                            Upload Script
                           </>
                         )}
                       </Button>
@@ -624,10 +630,10 @@ const GetStarted = () => {
                     </div>
                   </div>
                   <Textarea
-                    placeholder="Describe your video scene..."
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    maxLength={500}
+                    placeholder="Paste your script here..."
+                    value={script}
+                    onChange={(e) => setScript(e.target.value)}
+                    maxLength={5000}
                     className="min-h-[140px] resize-none bg-card border-border text-foreground"
                     disabled={isGenerating}
                   />
