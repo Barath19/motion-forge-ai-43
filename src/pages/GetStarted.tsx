@@ -71,6 +71,7 @@ const GetStarted = () => {
   const [editedImagePreview, setEditedImagePreview] = useState<string | null>(null);
   const [videoHistory, setVideoHistory] = useState<VideoHistoryItem[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [isGeneratingStoryboard, setIsGeneratingStoryboard] = useState(false);
 
   // Fetch video history on component mount
   useEffect(() => {
@@ -199,8 +200,16 @@ const GetStarted = () => {
   };
 
   const handleGenerateVideo = async () => {
-    // If storyboard mode is enabled, navigate to storyboard
+    // If storyboard mode is enabled, show loading and navigate after 15s
     if (storyboardMode) {
+      setIsGeneratingStoryboard(true);
+      setGenerationStatus('Generating storyboard...');
+      
+      // Mock 15 second loading
+      await new Promise(resolve => setTimeout(resolve, 15000));
+      
+      setIsGeneratingStoryboard(false);
+      setGenerationStatus('');
       navigate('/storyboard');
       return;
     }
@@ -689,10 +698,10 @@ const GetStarted = () => {
                   </Button>
                   <Button
                     onClick={handleGenerateVideo}
-                    disabled={isGenerating || !uploadedImage || !prompt.trim()}
+                    disabled={isGenerating || isGeneratingStoryboard || !uploadedImage || !prompt.trim()}
                     className="flex-1"
                   >
-                    {isGenerating ? (
+                    {isGenerating || isGeneratingStoryboard ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Running...
@@ -711,7 +720,7 @@ const GetStarted = () => {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-4">
                 <h2 className="text-sm font-medium text-muted-foreground">Result</h2>
-                {isGenerating && (
+                {(isGenerating || isGeneratingStoryboard) && (
                   <div className="flex items-center gap-2 text-sm">
                     <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
                     <span className="text-green-500">Running</span>
@@ -750,7 +759,7 @@ const GetStarted = () => {
                     >
                       Your browser does not support the video tag.
                     </video>
-                  ) : isGenerating ? (
+                  ) : (isGenerating || isGeneratingStoryboard) ? (
                     <div className="text-center p-12">
                       <div className="inline-block mb-4">
                         <svg className="w-16 h-16 text-muted-foreground/20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
