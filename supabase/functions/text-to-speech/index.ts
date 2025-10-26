@@ -6,7 +6,6 @@ const corsHeaders = {
 };
 
 const MCP_ENDPOINT = 'https://mcp.aci.dev/gateway/mcp?bundle_key=GRlB9reeVkGPp9omez9X9INeFw3x6LugsVOJ';
-const VOICE_ID = 'NBqeXKdZHweef6y0B67V';
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -14,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { text } = await req.json();
+    const { text, voice_id = 'NBqeXKdZHweef6y0B67V' } = await req.json();
 
     if (!text) {
       throw new Error('Text is required');
@@ -22,65 +21,72 @@ serve(async (req) => {
 
     console.log('Converting text to speech:', text);
 
+    // Call MCP endpoint with the exact format from user's example
     const response = await fetch(MCP_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        jsonrpc: '2.0',
-        id: 1,
-        method: 'tools/call',
-        params: {
-          name: 'ELEVEN_LABS__CREATE_SPEECH',
-          arguments: {
-            voice_id: VOICE_ID,
-            text: text
-          }
+        tool: 'ELEVEN_LABS__CREATE_SPEECH',
+        parameters: {
+          voice_id: voice_id,
+          text: text
         }
       }),
     });
 
     console.log('MCP response status:', response.status);
-
+    
     if (!response.ok) {
       const errorText = await response.text();
       console.error('MCP API error:', response.status, errorText);
       throw new Error(`TTS request failed: ${response.statusText}`);
     }
 
-    // Parse the JSON response which contains the audio data
-    const jsonResponse = await response.json();
-    console.log('MCP response keys:', Object.keys(jsonResponse));
-    
-    // The audio is likely base64 encoded in the response
-    let audioData;
-    if (jsonResponse.audio) {
-      audioData = jsonResponse.audio;
-    } else if (jsonResponse.data) {
-      audioData = jsonResponse.data;
-    } else if (jsonResponse.content) {
-      audioData = jsonResponse.content;
-    } else {
-      console.log('Full response:', JSON.stringify(jsonResponse).substring(0, 500));
-      throw new Error('Audio data not found in response');
-    }
+    const contentType = response.headers.get('content-type');
+    console.log('Response content-type:', contentType);
 
-    // Decode base64 to binary
-    const binaryString = atob(audioData);
-    const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
+    // If response is JSON, it might contain base64 audio
+    if (contentType?.includes('application/json')) {
+      const jsonResponse = await response.json();
+      console.log('JSON response keys:', Object.keys(jsonResponse));
+      
+      // Try to find audio data in various possible fields
+      const audioBase64 = jsonResponse.audio || jsonResponse.data || jsonResponse.content || jsonResponse.result;
+      
+      if (!audioBase64) {
+        console.error('Full response:', JSON.stringify(jsonResponse).substring(0, 1000));
+        throw new Error('No audio data found in response');
+      }
+
+      // Decode base64 to binary
+      const binaryString = atob(audioBase64);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      
+      console.log('Decoded audio size:', bytes.length, 'bytes');
+      
+      return new Response(bytes, {
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'audio/mpeg',
+        },
+      });
+    } else {
+      // If response is already binary audio
+      const audioBlob = await response.blob();
+      console.log('Audio blob size:', audioBlob.size);
+      
+      return new Response(audioBlob, {
+        headers: {
+          ...corsHeaders,
+          'Content-Type': contentType || 'audio/mpeg',
+        },
+      });
     }
-    
-    console.log('Audio size:', bytes.length, 'bytes');
-    
-    return new Response(bytes, {
-      headers: {
-        ...corsHeaders,
-        'Content-Type': 'audio/mpeg',
-      },
-    });
   } catch (error) {
     console.error('Error in text-to-speech function:', error);
     return new Response(
