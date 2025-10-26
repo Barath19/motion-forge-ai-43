@@ -309,6 +309,19 @@ const GetStarted = () => {
   };
 
   const handleStartRecording = async () => {
+    try {
+      await startRecording();
+      toast.success('Recording started');
+    } catch (error) {
+      toast.error('Failed to start recording. Please allow microphone access.');
+    }
+  };
+
+  const handleStopRecording = async () => {
+    stopRecording();
+    toast.success('Recording stopped');
+    
+    // Play the uploaded audio file after stopping recording
     if (!recordAudioRef.current) {
       recordAudioRef.current = new Audio(recordAudio);
       recordAudioRef.current.onended = () => {
@@ -319,19 +332,9 @@ const GetStarted = () => {
     try {
       setIsPlayingRecordAudio(true);
       await recordAudioRef.current.play();
-      toast.success('Playing audio');
     } catch (error) {
       setIsPlayingRecordAudio(false);
-      toast.error('Failed to play audio');
-    }
-  };
-
-  const handleStopRecording = () => {
-    if (recordAudioRef.current) {
-      recordAudioRef.current.pause();
-      recordAudioRef.current.currentTime = 0;
-      setIsPlayingRecordAudio(false);
-      toast.success('Audio stopped');
+      console.error('Failed to play audio:', error);
     }
   };
 
@@ -595,18 +598,18 @@ const GetStarted = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={isPlayingRecordAudio ? handleStopRecording : handleStartRecording}
+                        onClick={isRecording ? handleStopRecording : handleStartRecording}
                         disabled={isGenerating}
                         className="h-8"
                       >
-                        {isPlayingRecordAudio ? (
+                        {isRecording ? (
                           <>
                             <Square className="h-3 w-3 mr-1 fill-current" />
                             Stop
                           </>
                         ) : (
                           <>
-                            <Play className="h-3 w-3 mr-1" />
+                            <Mic className="h-3 w-3 mr-1" />
                             Record
                           </>
                         )}
