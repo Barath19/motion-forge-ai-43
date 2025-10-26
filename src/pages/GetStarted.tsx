@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { resizeImageTo1280x720 } from '@/utils/imageProcessing';
+import { cn } from '@/lib/utils';
 import { 
   createVideoJob, 
   pollForVideoCompletion, 
@@ -268,7 +269,7 @@ const GetStarted = () => {
     <div className="min-h-screen bg-[#0a0a0a] text-foreground">
       <main className="relative">
         {/* Header */}
-        <div className="border-b border-border/10 bg-[#0f0f0f] px-6 py-4">
+        <div className="border-b border-border bg-[#0f0f0f] px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button 
@@ -311,20 +312,20 @@ const GetStarted = () => {
 
         <div className="grid lg:grid-cols-2 min-h-[calc(100vh-88px)]">
           {/* Left Column - Input */}
-          <div className="border-r border-border/10 bg-[#0f0f0f] p-6">
+          <div className="border-r border-border bg-[#0f0f0f] p-6">
             <div className="max-w-2xl">
               <h2 className="text-sm font-medium text-muted-foreground mb-4">Input</h2>
               
               <div className="space-y-6">
                 {/* Image Upload */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground/90">Image</label>
+                  <label className="text-sm font-medium text-foreground">Image</label>
                   <p className="text-xs text-muted-foreground">
                     Drag and drop file(s) or provide a base64 encoded data URL
                   </p>
                   
                   {uploadedImage ? (
-                    <div className="relative flex items-center gap-3 rounded-lg border border-border/20 bg-background p-3">
+                    <div className="relative flex items-center gap-3 rounded-lg border border-border bg-card p-3">
                       <img
                         src={uploadedImage.url}
                         alt={uploadedImage.filename}
@@ -350,8 +351,8 @@ const GetStarted = () => {
                       onClick={handleUploadClick}
                       className={`relative rounded-lg border-2 border-dashed transition-all cursor-pointer ${
                         isDragging
-                          ? 'border-primary bg-primary/5'
-                          : 'border-border/30 bg-background hover:border-border/50'
+                          ? 'border-primary bg-primary/10'
+                          : 'border-border bg-card hover:border-primary/50 hover:bg-primary/5'
                       }`}
                     >
                       <div className="flex items-center justify-center p-8">
@@ -379,7 +380,7 @@ const GetStarted = () => {
                 {/* Prompt */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium text-foreground/90">Prompt</label>
+                    <label className="text-sm font-medium text-foreground">Prompt</label>
                     <div className="flex items-center gap-2">
                       <Button
                         variant="outline"
@@ -426,11 +427,11 @@ const GetStarted = () => {
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
                     maxLength={500}
-                    className="min-h-[140px] resize-none bg-background border-border/20 text-foreground"
+                    className="min-h-[140px] resize-none bg-card border-border text-foreground"
                     disabled={isGenerating}
                   />
                   {audioBlob && (
-                    <div className="flex items-center gap-2 p-2 rounded bg-background/50 border border-border/20">
+                    <div className="flex items-center gap-2 p-2 rounded bg-card border border-border">
                       <audio src={URL.createObjectURL(audioBlob)} controls className="flex-1 h-8" />
                       <Button
                         variant="ghost"
@@ -443,7 +444,7 @@ const GetStarted = () => {
                     </div>
                   )}
                   {ttsAudioUrl && (
-                    <div className="flex items-center gap-2 p-2 rounded bg-background/50 border border-border/20">
+                    <div className="flex items-center gap-2 p-2 rounded bg-card border border-border">
                       <audio ref={audioRef} src={ttsAudioUrl} className="hidden" />
                       <Button
                         variant="ghost"
@@ -460,9 +461,9 @@ const GetStarted = () => {
                 </div>
 
                 {/* Storyboard Toggle */}
-                <div className="flex items-center justify-between rounded-lg border border-border/20 bg-background p-4">
+                <div className="flex items-center justify-between rounded-lg border border-border bg-card p-4">
                   <div className="flex-1">
-                    <Label htmlFor="storyboard-mode" className="text-sm font-medium text-foreground/90">
+                    <Label htmlFor="storyboard-mode" className="text-sm font-medium text-foreground">
                       Storyboard Mode
                     </Label>
                     <p className="text-xs text-muted-foreground mt-1">
@@ -479,7 +480,7 @@ const GetStarted = () => {
 
                 {/* Duration */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground/90">Duration</label>
+                  <label className="text-sm font-medium text-foreground">Duration</label>
                   <p className="text-xs text-muted-foreground">Duration in seconds</p>
                   <div className="flex gap-2">
                     {(selectedModel === 'wan' ? wanDurations : soraDurations).map((d) => (
@@ -489,7 +490,7 @@ const GetStarted = () => {
                         size="sm"
                         onClick={() => setDuration(d)}
                         disabled={isGenerating}
-                        className="min-w-[60px]"
+                        className={cn("min-w-[60px]", duration === d && "shadow-lg ring-1 ring-primary/20")}
                       >
                         {d}
                       </Button>
@@ -556,12 +557,12 @@ const GetStarted = () => {
             </div>
 
             <Tabs defaultValue="preview">
-              <TabsList className="bg-background/50 mb-4">
+              <TabsList className="bg-card border border-border mb-4">
                 <TabsTrigger value="preview">Preview</TabsTrigger>
                 <TabsTrigger value="json">JSON</TabsTrigger>
               </TabsList>
               <TabsContent value="preview" className="mt-0">
-                <div className="rounded-lg border border-border/10 bg-[#0f0f0f] overflow-hidden min-h-[500px] flex items-center justify-center">
+                <div className="rounded-lg border border-border bg-[#0f0f0f] overflow-hidden min-h-[500px] flex items-center justify-center">
                   {generatedVideo ? (
                     <video
                       src={generatedVideo.url}
@@ -608,7 +609,7 @@ const GetStarted = () => {
                 </div>
               </TabsContent>
               <TabsContent value="json">
-                <div className="rounded-lg border border-border/10 bg-[#0f0f0f] p-4 min-h-[500px]">
+                <div className="rounded-lg border border-border bg-[#0f0f0f] p-4 min-h-[500px]">
                   <pre className="text-xs text-muted-foreground">
                     {generatedVideo ? JSON.stringify(generatedVideo, null, 2) : '{}'}
                   </pre>
