@@ -36,6 +36,9 @@ serve(async (req) => {
       }),
     });
 
+    console.log('MCP response status:', response.status);
+    console.log('MCP response headers:', Object.fromEntries(response.headers.entries()));
+
     if (!response.ok) {
       const errorText = await response.text();
       console.error('MCP API error:', response.status, errorText);
@@ -43,6 +46,7 @@ serve(async (req) => {
     }
 
     const audioBlob = await response.blob();
+    console.log('Audio blob size:', audioBlob.size, 'type:', audioBlob.type);
     
     return new Response(audioBlob, {
       headers: {
