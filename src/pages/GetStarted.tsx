@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
 import { Upload, X, Download, Loader2, Mic, Square, Play, Volume2, LayoutGrid, ArrowLeft, History } from 'lucide-react';
+import recordAudio from '@/assets/record-audio.mp3';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -64,6 +65,8 @@ const GetStarted = () => {
   const { isRecording, audioBlob, startRecording, stopRecording, clearRecording } = useVoiceRecorder();
   const [isConvertingTTS, setIsConvertingTTS] = useState(false);
   const [ttsAudioUrl, setTtsAudioUrl] = useState<string | null>(null);
+  const [isPlayingRecordAudio, setIsPlayingRecordAudio] = useState(false);
+  const recordAudioRef = useRef<HTMLAudioElement | null>(null);
   const [isEditingImage, setIsEditingImage] = useState(false);
   const [editPrompt, setEditPrompt] = useState('');
   const [isEditingAI, setIsEditingAI] = useState(false);
@@ -306,17 +309,30 @@ const GetStarted = () => {
   };
 
   const handleStartRecording = async () => {
+    if (!recordAudioRef.current) {
+      recordAudioRef.current = new Audio(recordAudio);
+      recordAudioRef.current.onended = () => {
+        setIsPlayingRecordAudio(false);
+      };
+    }
+    
     try {
-      await startRecording();
-      toast.success('Recording started');
+      setIsPlayingRecordAudio(true);
+      await recordAudioRef.current.play();
+      toast.success('Playing audio');
     } catch (error) {
-      toast.error('Failed to start recording. Please allow microphone access.');
+      setIsPlayingRecordAudio(false);
+      toast.error('Failed to play audio');
     }
   };
 
   const handleStopRecording = () => {
-    stopRecording();
-    toast.success('Recording stopped');
+    if (recordAudioRef.current) {
+      recordAudioRef.current.pause();
+      recordAudioRef.current.currentTime = 0;
+      setIsPlayingRecordAudio(false);
+      toast.success('Audio stopped');
+    }
   };
 
   const handleConvertToSpeech = async () => {
@@ -579,18 +595,18 @@ const GetStarted = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={isRecording ? handleStopRecording : handleStartRecording}
+                        onClick={isPlayingRecordAudio ? handleStopRecording : handleStartRecording}
                         disabled={isGenerating}
                         className="h-8"
                       >
-                        {isRecording ? (
+                        {isPlayingRecordAudio ? (
                           <>
                             <Square className="h-3 w-3 mr-1 fill-current" />
                             Stop
                           </>
                         ) : (
                           <>
-                            <Mic className="h-3 w-3 mr-1" />
+                            <Play className="h-3 w-3 mr-1" />
                             Record
                           </>
                         )}
