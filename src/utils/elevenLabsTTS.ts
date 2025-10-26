@@ -1,5 +1,4 @@
-const MCP_ENDPOINT = 'https://mcp.aci.dev/gateway/mcp?bundle_key=GRlB9reeVkGPp9omez9X9INeFw3x6LugsVOJ';
-const VOICE_ID = 'NBqeXKdZHweef6y0B67V';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface TTSRequest {
   text: string;
@@ -7,26 +6,16 @@ export interface TTSRequest {
 
 export const convertTextToSpeech = async (text: string): Promise<Blob> => {
   try {
-    const response = await fetch(MCP_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        tool: 'ELEVEN_LABS__CREATE_SPEECH',
-        parameters: {
-          voice_id: VOICE_ID,
-          text: text
-        }
-      }),
+    const { data, error } = await supabase.functions.invoke('text-to-speech', {
+      body: { text },
     });
 
-    if (!response.ok) {
-      throw new Error(`TTS request failed: ${response.statusText}`);
+    if (error) {
+      throw error;
     }
 
-    const audioBlob = await response.blob();
-    return audioBlob;
+    // The response is already a blob from the edge function
+    return data as Blob;
   } catch (error) {
     console.error('Error converting text to speech:', error);
     throw error;
