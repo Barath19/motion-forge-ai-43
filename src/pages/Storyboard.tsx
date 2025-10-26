@@ -78,12 +78,16 @@ const Storyboard = () => {
   const [editedName, setEditedName] = useState('');
   const [editedSeconds, setEditedSeconds] = useState(12);
   const [editedPrompt, setEditedPrompt] = useState('');
+  const [changeInstruction, setChangeInstruction] = useState('');
+  const [showChangeMode, setShowChangeMode] = useState(false);
 
   const handleSceneClick = (scene: Scene) => {
     setSelectedScene(scene);
     setEditedName(scene.name);
     setEditedSeconds(scene.seconds);
     setEditedPrompt(scene.prompt);
+    setChangeInstruction('');
+    setShowChangeMode(false);
     setIsDialogOpen(true);
   };
 
@@ -92,11 +96,17 @@ const Storyboard = () => {
 
     setIsGenerating(true);
     try {
+      const requestBody: any = showChangeMode 
+        ? { 
+            prompt: changeInstruction,
+            existingImage: selectedScene.image 
+          }
+        : { 
+            prompt: editedPrompt
+          };
+
       const { data, error } = await supabase.functions.invoke('generate-scene-image', {
-        body: { 
-          prompt: editedPrompt,
-          existingImage: selectedScene.image 
-        }
+        body: requestBody
       });
 
       if (error) throw error;
@@ -236,31 +246,54 @@ const Storyboard = () => {
                     onChange={(e) => setEditedPrompt(e.target.value)}
                     placeholder="Describe the scene in detail..."
                     className="min-h-[200px]"
+                    disabled={showChangeMode}
                   />
                 </div>
+
+                {showChangeMode && (
+                  <div className="grid gap-2">
+                    <Label htmlFor="change-instruction">Change Instruction</Label>
+                    <Textarea
+                      id="change-instruction"
+                      value={changeInstruction}
+                      onChange={(e) => setChangeInstruction(e.target.value)}
+                      placeholder="E.g., 'remove the people from background'"
+                      className="min-h-[100px]"
+                    />
+                  </div>
+                )}
               </div>
 
-              <div className="flex gap-3 justify-end">
+              <div className="flex gap-3 justify-between">
                 <Button
                   variant="outline"
-                  onClick={() => setIsDialogOpen(false)}
+                  onClick={() => setShowChangeMode(!showChangeMode)}
                   disabled={isGenerating}
                 >
-                  Cancel
+                  {showChangeMode ? 'Generate New' : 'Change Scene'}
                 </Button>
-                <Button
-                  onClick={handleGenerateImage}
-                  disabled={isGenerating || !editedPrompt.trim()}
-                >
-                  {isGenerating ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Generating...
-                    </>
-                  ) : (
-                    'Generate Image'
-                  )}
-                </Button>
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsDialogOpen(false)}
+                    disabled={isGenerating}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleGenerateImage}
+                    disabled={isGenerating || (showChangeMode ? !changeInstruction.trim() : !editedPrompt.trim())}
+                  >
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      showChangeMode ? 'Apply Changes' : 'Generate Image'
+                    )}
+                  </Button>
+                </div>
               </div>
             </div>
           )}

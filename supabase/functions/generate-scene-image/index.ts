@@ -18,7 +18,15 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    console.log("Generating image with prompt:", prompt);
+    const requestType = existingImage ? "Change scene" : "Generate new";
+    console.log("Request type:", requestType);
+    
+    if (existingImage) {
+      console.log("Editing existing image with instruction:", prompt);
+    } else {
+      console.log("Generating new image from prompt");
+    }
+    console.log("Prompt:", prompt);
 
     // Build the message content based on whether we're editing or generating new
     const messageContent: any[] = [
