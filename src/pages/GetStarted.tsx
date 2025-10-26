@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { resizeImageTo1280x720 } from '@/utils/imageProcessing';
+import { resizeImageToResolution } from '@/utils/imageProcessing';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { 
@@ -274,7 +274,7 @@ const GetStarted = () => {
         // Use existing Sora workflow
         setGenerationStatus('Preparing image...');
 
-        const resizedImage = await resizeImageTo1280x720(uploadedImage.file);
+        const resizedImage = await resizeImageToResolution(uploadedImage.file, resolution);
         
         setGenerationStatus('Creating video job...');
         const job = await createVideoJob({

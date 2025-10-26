@@ -1,7 +1,7 @@
 /**
- * Resize and crop image to exact dimensions (1280x720px) for video generation
+ * Resize and crop image to exact dimensions for video generation
  */
-export const resizeImageTo1280x720 = async (file: File): Promise<Blob> => {
+export const resizeImageToResolution = async (file: File, resolution: string): Promise<Blob> => {
   return new Promise((resolve, reject) => {
     const img = new Image();
     const canvas = document.createElement('canvas');
@@ -13,8 +13,10 @@ export const resizeImageTo1280x720 = async (file: File): Promise<Blob> => {
     }
 
     img.onload = () => {
-      const targetWidth = 1280;
-      const targetHeight = 720;
+      // Parse resolution string (e.g., "1280x720" or "720x1280")
+      const [width, height] = resolution.split('x').map(Number);
+      const targetWidth = width;
+      const targetHeight = height;
       const targetAspect = targetWidth / targetHeight;
       const imageAspect = img.width / img.height;
 
