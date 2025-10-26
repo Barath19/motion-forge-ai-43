@@ -21,17 +21,46 @@ serve(async (req) => {
 
     console.log('Converting text to speech:', text);
 
-    // Call MCP endpoint with the exact format from user's example
+    // Initialize MCP session first
+    const initResponse = await fetch(MCP_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'initialize',
+        params: {
+          protocolVersion: '2024-11-05',
+          capabilities: {},
+          clientInfo: {
+            name: 'text-to-speech',
+            version: '1.0.0'
+          }
+        }
+      }),
+    });
+
+    const initData = await initResponse.json();
+    console.log('MCP initialization response:', initData);
+
+    // Now call the tool with proper JSON-RPC format
     const response = await fetch(MCP_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        tool: 'ELEVEN_LABS__CREATE_SPEECH',
-        parameters: {
-          voice_id: voice_id,
-          text: text
+        jsonrpc: '2.0',
+        id: 2,
+        method: 'tools/call',
+        params: {
+          name: 'ELEVEN_LABS__CREATE_SPEECH',
+          arguments: {
+            voice_id: voice_id,
+            text: text
+          }
         }
       }),
     });
