@@ -74,43 +74,89 @@ const Storyboard = () => {
 
   const [selectedScene, setSelectedScene] = useState<Scene | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [editedName, setEditedName] = useState('');
   const [editedSeconds, setEditedSeconds] = useState(12);
   const [editedPrompt, setEditedPrompt] = useState('');
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [changeInstruction, setChangeInstruction] = useState('');
+  const [showChangePrompt, setShowChangePrompt] = useState(false);
 
   const handleSceneClick = (scene: Scene) => {
     setSelectedScene(scene);
     setEditedName(scene.name);
     setEditedSeconds(scene.seconds);
     setEditedPrompt(scene.prompt);
-    setUploadedImage(null);
+    setChangeInstruction('');
+    setShowChangePrompt(false);
     setIsDialogOpen(true);
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setUploadedImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+  const handleImageClick = () => {
+    setShowChangePrompt(true);
+  };
+
+  const handleApplyChanges = async () => {
+    if (!selectedScene || !changeInstruction.trim()) return;
+
+    setIsGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-scene-image', {
+        body: { 
+          prompt: changeInstruction,
+          existingImage: selectedScene.image 
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.error) {
+        toast.error(data.error);
+        return;
+      }
+
+      // Update the scene with the new image
+      setTiles(prevTiles => 
+        prevTiles.map(tile => 
+          tile.id === selectedScene.id 
+            ? { 
+                ...tile, 
+                image: data.imageUrl,
+                name: editedName,
+                seconds: editedSeconds,
+                prompt: editedPrompt
+              }
+            : tile
+        )
+      );
+
+      setSelectedScene(prev => prev ? {
+        ...prev,
+        image: data.imageUrl,
+        name: editedName,
+        seconds: editedSeconds,
+        prompt: editedPrompt
+      } : null);
+
+      toast.success('Image updated successfully!');
+      setShowChangePrompt(false);
+      setChangeInstruction('');
+    } catch (error) {
+      console.error('Error changing image:', error);
+      toast.error('Failed to change image');
+    } finally {
+      setIsGenerating(false);
     }
   };
 
   const handleSaveChanges = () => {
     if (!selectedScene) return;
 
-    const newImage = uploadedImage || selectedScene.image;
-
-    // Update the scene with the new image and data
+    // Update the scene with edited metadata
     setTiles(prevTiles => 
       prevTiles.map(tile => 
         tile.id === selectedScene.id 
           ? { 
               ...tile, 
-              image: newImage,
               name: editedName,
               seconds: editedSeconds,
               prompt: editedPrompt
@@ -121,7 +167,6 @@ const Storyboard = () => {
 
     setSelectedScene(prev => prev ? {
       ...prev,
-      image: newImage,
       name: editedName,
       seconds: editedSeconds,
       prompt: editedPrompt
@@ -190,23 +235,58 @@ const Storyboard = () => {
           
           {selectedScene && (
             <div className="space-y-6">
-              <div className="w-full aspect-video rounded-lg overflow-hidden bg-muted">
+              <div 
+                className="w-full aspect-video rounded-lg overflow-hidden bg-muted cursor-pointer relative group"
+                onClick={handleImageClick}
+              >
                 <img 
-                  src={uploadedImage || selectedScene.image} 
+                  src={selectedScene.image} 
                   alt={selectedScene.content}
                   className="w-full h-full object-cover"
                 />
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <p className="text-white font-medium">Click to edit image</p>
+                </div>
               </div>
 
-              <div className="grid gap-2">
-                <Label htmlFor="image-upload">Replace Image</Label>
-                <Input
-                  id="image-upload"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                />
-              </div>
+              {showChangePrompt && (
+                <div className="grid gap-2 p-4 border border-border rounded-lg bg-muted/30">
+                  <Label htmlFor="change-instruction">Edit Instruction</Label>
+                  <Textarea
+                    id="change-instruction"
+                    value={changeInstruction}
+                    onChange={(e) => setChangeInstruction(e.target.value)}
+                    placeholder="E.g., 'remove people from background'"
+                    className="min-h-[100px]"
+                    autoFocus
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setShowChangePrompt(false);
+                        setChangeInstruction('');
+                      }}
+                      disabled={isGenerating}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleApplyChanges}
+                      disabled={isGenerating || !changeInstruction.trim()}
+                    >
+                      {isGenerating ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Processing...
+                        </>
+                      ) : (
+                        'Apply Changes'
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              )}
 
               <div className="grid gap-4">
                 <div className="grid gap-2">
@@ -247,10 +327,11 @@ const Storyboard = () => {
                 <Button
                   variant="outline"
                   onClick={() => setIsDialogOpen(false)}
+                  disabled={isGenerating}
                 >
-                  Cancel
+                  Close
                 </Button>
-                <Button onClick={handleSaveChanges}>
+                <Button onClick={handleSaveChanges} disabled={isGenerating}>
                   Save Changes
                 </Button>
               </div>
