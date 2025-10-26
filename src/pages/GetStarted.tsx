@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { resizeImageTo1280x720 } from '@/utils/imageProcessing';
 import { cn } from '@/lib/utils';
 import { 
@@ -52,6 +53,9 @@ const GetStarted = () => {
   const { isRecording, audioBlob, startRecording, stopRecording, clearRecording } = useVoiceRecorder();
   const [isConvertingTTS, setIsConvertingTTS] = useState(false);
   const [ttsAudioUrl, setTtsAudioUrl] = useState<string | null>(null);
+  const [isEditingImage, setIsEditingImage] = useState(false);
+  const [editPrompt, setEditPrompt] = useState('');
+  const [isEditingAI, setIsEditingAI] = useState(false);
 
   const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault();
@@ -265,6 +269,82 @@ const GetStarted = () => {
     }
   };
 
+  const handleEditImage = async () => {
+    if (!uploadedImage || !editPrompt.trim()) {
+      toast.error('Please enter an edit instruction');
+      return;
+    }
+
+    setIsEditingAI(true);
+    try {
+      const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'google/gemini-2.5-flash-image-preview',
+          messages: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'text',
+                  text: editPrompt
+                },
+                {
+                  type: 'image_url',
+                  image_url: {
+                    url: uploadedImage.url
+                  }
+                }
+              ]
+            }
+          ],
+          modalities: ['image', 'text']
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to edit image');
+      }
+
+      const data = await response.json();
+      const editedImageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+
+      if (!editedImageUrl) {
+        throw new Error('No edited image returned');
+      }
+
+      // Convert base64 to blob and create object URL
+      const base64Response = await fetch(editedImageUrl);
+      const blob = await base64Response.blob();
+      const newFile = new File([blob], 'edited-image.png', { type: 'image/png' });
+      const newUrl = URL.createObjectURL(blob);
+
+      // Clean up old URL
+      if (uploadedImage.url) {
+        URL.revokeObjectURL(uploadedImage.url);
+      }
+
+      setUploadedImage({
+        url: newUrl,
+        filename: 'edited-image.png',
+        file: newFile,
+      });
+
+      toast.success('Image edited successfully!');
+      setIsEditingImage(false);
+      setEditPrompt('');
+    } catch (error) {
+      console.error('Error editing image:', error);
+      toast.error('Failed to edit image');
+    } finally {
+      setIsEditingAI(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-foreground">
       <main className="relative">
@@ -325,21 +405,22 @@ const GetStarted = () => {
                   </p>
                   
                   {uploadedImage ? (
-                    <div className="relative flex items-center gap-3 rounded-lg border border-border bg-card p-3">
+                    <div className="relative aspect-square rounded-lg border border-border bg-card overflow-hidden group">
                       <img
                         src={uploadedImage.url}
                         alt={uploadedImage.filename}
-                        className="h-12 w-12 rounded object-cover"
+                        className="w-full h-full object-cover cursor-pointer"
+                        onClick={() => !isGenerating && setIsEditingImage(true)}
                       />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-foreground/80 truncate">{uploadedImage.filename}</p>
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <p className="text-white text-sm font-medium">Click to edit with AI</p>
                       </div>
                       <button
                         onClick={handleRemoveImage}
-                        className="rounded p-1 hover:bg-destructive/10 transition-colors"
+                        className="absolute top-2 right-2 rounded p-1.5 bg-destructive hover:bg-destructive/90 transition-colors z-10"
                         disabled={isGenerating}
                       >
-                        <X className="h-4 w-4" />
+                        <X className="h-4 w-4 text-white" />
                       </button>
                     </div>
                   ) : (
@@ -349,17 +430,18 @@ const GetStarted = () => {
                       onDragLeave={handleDragLeave}
                       onDrop={handleDrop}
                       onClick={handleUploadClick}
-                      className={`relative rounded-lg border-2 border-dashed transition-all cursor-pointer ${
+                      className={cn(
+                        "relative aspect-square rounded-lg border-2 border-dashed transition-all cursor-pointer",
                         isDragging
                           ? 'border-primary bg-primary/10'
                           : 'border-border bg-card hover:border-primary/50 hover:bg-primary/5'
-                      }`}
+                      )}
                     >
-                      <div className="flex items-center justify-center p-8">
+                      <div className="absolute inset-0 flex items-center justify-center p-8">
                         <div className="text-center">
                           <Upload className="mx-auto h-8 w-8 text-muted-foreground/40 mb-2" />
                           <p className="text-sm text-muted-foreground">
-                            Enter URL or base64 data
+                            Drag & drop or click to upload
                           </p>
                         </div>
                       </div>
@@ -618,6 +700,63 @@ const GetStarted = () => {
             </Tabs>
           </div>
         </div>
+
+        {/* AI Image Edit Dialog */}
+        <Dialog open={isEditingImage} onOpenChange={setIsEditingImage}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle>Edit Image with AI</DialogTitle>
+              <DialogDescription>
+                Describe how you want to modify the image
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {uploadedImage && (
+                <div className="aspect-square rounded-lg overflow-hidden border border-border">
+                  <img
+                    src={uploadedImage.url}
+                    alt="Original"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+              <Textarea
+                placeholder="e.g., Make it more colorful, add snow, change to sunset lighting..."
+                value={editPrompt}
+                onChange={(e) => setEditPrompt(e.target.value)}
+                className="min-h-[100px] resize-none"
+                disabled={isEditingAI}
+              />
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsEditingImage(false);
+                    setEditPrompt('');
+                  }}
+                  disabled={isEditingAI}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleEditImage}
+                  disabled={isEditingAI || !editPrompt.trim()}
+                  className="flex-1"
+                >
+                  {isEditingAI ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Editing...
+                    </>
+                  ) : (
+                    'Edit Image'
+                  )}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );
