@@ -45,19 +45,28 @@ serve(async (req) => {
     const initData = await initResponse.json();
     console.log('MCP initialization response:', initData);
 
-    // Extract session ID from response headers
+    // Extract session ID from response headers - try multiple possible header names
     const sessionId = initResponse.headers.get('x-mcp-session-id') || 
                      initResponse.headers.get('mcp-session-id') ||
+                     initResponse.headers.get('X-MCP-Session-ID') ||
+                     initResponse.headers.get('MCP-Session-ID') ||
                      initData.sessionId;
     
     console.log('Session ID:', sessionId);
+    console.log('All response headers:', Object.fromEntries(initResponse.headers.entries()));
 
-    // Now call the tool with session ID header
+    if (!sessionId) {
+      throw new Error('No session ID returned from MCP initialization');
+    }
+
+    // Now call the tool with session ID header - try the exact header name MCP expects
     const response = await fetch(MCP_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...(sessionId && { 'x-mcp-session-id': sessionId }),
+        'MCP-Session-ID': sessionId,
+        'x-mcp-session-id': sessionId,
+        'mcp-session-id': sessionId,
       },
       body: JSON.stringify({
         jsonrpc: '2.0',
