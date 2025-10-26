@@ -227,13 +227,19 @@ const Storyboard = () => {
       <Navigation />
       
       <main className="container mx-auto px-4 py-24">
-        <div className="mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
-            Storyboard
-          </h1>
-          <p className="text-lg text-muted-foreground">
-            Organize your scenes and visualize your story
-          </p>
+        <div className="mb-12 flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
+              Storyboard
+            </h1>
+            <p className="text-lg text-muted-foreground">
+              Organize your scenes and visualize your story
+            </p>
+          </div>
+          <Button size="lg" className="gap-2">
+            <Plus className="h-5 w-5" />
+            Generate Video
+          </Button>
         </div>
 
         <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
