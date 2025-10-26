@@ -6,16 +6,26 @@ export interface TTSRequest {
 
 export const convertTextToSpeech = async (text: string): Promise<Blob> => {
   try {
-    const { data, error } = await supabase.functions.invoke('text-to-speech', {
-      body: { text },
-    });
+    const response = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/text-to-speech`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ text }),
+      }
+    );
 
-    if (error) {
-      throw error;
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('TTS API error:', response.status, errorText);
+      throw new Error(`TTS request failed: ${response.statusText}`);
     }
 
-    // The response is already a blob from the edge function
-    return data as Blob;
+    const blob = await response.blob();
+    return blob;
   } catch (error) {
     console.error('Error converting text to speech:', error);
     throw error;
