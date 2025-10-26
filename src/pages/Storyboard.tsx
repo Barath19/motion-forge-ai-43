@@ -116,15 +116,40 @@ const Storyboard = () => {
     toast.success('Image reverted to original');
   };
 
+  const convertImageToBase64 = async (imageUrl: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Failed to get canvas context'));
+          return;
+        }
+        ctx.drawImage(img, 0, 0);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+        resolve(dataUrl);
+      };
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = imageUrl;
+    });
+  };
+
   const handleApplyChanges = async () => {
     if (!selectedScene || !changeInstruction.trim()) return;
 
     setIsGenerating(true);
     try {
+      // Convert image to base64
+      const imageBase64 = await convertImageToBase64(selectedScene.image);
+
       const { data, error } = await supabase.functions.invoke('generate-scene-image', {
         body: { 
           prompt: changeInstruction,
-          existingImage: selectedScene.image 
+          existingImage: imageBase64 
         }
       });
 
