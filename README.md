@@ -1,8 +1,16 @@
-# Welcome to your Lovable project
+# Welcome to framelab 
+
+<img width="1276" height="879" alt="Screenshot 2025-10-26 at 13 48 31" src="https://github.com/user-attachments/assets/ef78ac24-00fa-413a-b257-2dc60a38a49f" />
+
 
 ## Project info
 
 **URL**: https://lovable.dev/projects/71e7ef3d-a16c-4766-bdfc-41e0b6099ea7
+
+**Live**: https://framelab.video
+
+
+
 
 ## How can I edit this code?
 
