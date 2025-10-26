@@ -5,6 +5,8 @@ import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { resizeImageTo1280x720 } from '@/utils/imageProcessing';
 import { 
@@ -39,6 +41,7 @@ const GetStarted = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationStatus, setGenerationStatus] = useState<string>('');
   const [generatedVideo, setGeneratedVideo] = useState<GeneratedVideo | null>(null);
+  const [storyboardMode, setStoryboardMode] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
@@ -124,6 +127,12 @@ const GetStarted = () => {
   };
 
   const handleGenerateVideo = async () => {
+    // If storyboard mode is enabled, navigate to storyboard
+    if (storyboardMode) {
+      navigate('/storyboard');
+      return;
+    }
+
     if (!prompt.trim()) {
       toast.error('Please enter a video description');
       return;
@@ -361,6 +370,24 @@ const GetStarted = () => {
                         </Button>
                       ))}
                     </div>
+                  </div>
+
+                  {/* Storyboard Toggle */}
+                  <div className="flex items-center justify-between space-y-2 rounded-lg border border-border/20 bg-background p-4">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="storyboard-mode" className="text-sm font-medium">
+                        Storyboard Mode
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        Enable to organize scenes before generating video
+                      </p>
+                    </div>
+                    <Switch
+                      id="storyboard-mode"
+                      checked={storyboardMode}
+                      onCheckedChange={setStoryboardMode}
+                      disabled={isGenerating}
+                    />
                   </div>
 
                   {/* Image Upload */}
