@@ -318,6 +318,16 @@ const GetStarted = () => {
   };
 
   const handleStopRecording = async () => {
+    // If audio is playing, stop it
+    if (isPlayingRecordAudio && recordAudioRef.current) {
+      recordAudioRef.current.pause();
+      recordAudioRef.current.currentTime = 0;
+      setIsPlayingRecordAudio(false);
+      toast.success('Playback stopped');
+      return;
+    }
+    
+    // Otherwise, stop recording and play the audio
     stopRecording();
     toast.success('Recording stopped');
     
